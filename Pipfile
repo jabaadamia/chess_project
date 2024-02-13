@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 django = "==5.0.2"
 psycopg2-binary = "*"
+django-allauth = "==0.61.1"
 
 [dev-packages]
 
