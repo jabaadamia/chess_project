@@ -1,0 +1,10 @@
+{% extends '_base.html' %}
+
+{% block content %}
+    <h1>Puzzles related to "{{ tag }}" tag</h1>
+    <ul>
+    {% for puzzle in puzzles %}
+        <li>{{ puzzle }}</li>
+    {% endfor %}
+    </ul>
+{% endblock %}

@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<h1>Homepage</h1>
+<h1>puzzles</h1>
 
 {% if user.is_authenticated %}
     Hi {{ user.email }}!
@@ -18,7 +18,8 @@
     <a href="{% url 'account_login' %}">Log In</a>
     <a href="{% url 'account_signup' %}">Sign Up</a>
 {% endif %}
-<br>
-<a href="{% url 'puzzle_home' %}">puzzles</a>
 
+{% for tag, data in puzzles_per_tag_count.items %}
+<div><a href="{{ data.url }}">{{ tag }}: {{ data.count }}</a></div>
+{% endfor %}
 {% endblock content %}
