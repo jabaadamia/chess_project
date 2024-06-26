@@ -1,5 +1,6 @@
-from django.views.generic import ListView, TemplateView
+from django.views.generic import ListView, DetailView, TemplateView
 from django.urls import reverse
+from django.shortcuts import get_object_or_404
 
 from .models import Puzzle, Tag
 
@@ -16,11 +17,19 @@ class PuzzleHome(ListView):
         puzzles_per_tag_count = {}
 
         for tag in tags:
-            count = Puzzle.objects.filter(tags=tag).count()
-            puzzles_per_tag_count[tag.name] = {
-                'count': count,
-                'url': reverse('tag_puzzle_list', kwargs={'tag': tag.name})
-            }
+            tag_puzzles = Puzzle.objects.filter(tags=tag)
+            count = tag_puzzles.count()
+            first = tag_puzzles.first()
+            if first:
+                puzzles_per_tag_count[tag.name] = {
+                    'count': count,
+                    'url': reverse('tag_puzzle_list', kwargs={'tag': tag.name, 'pk': first.pk})
+                }
+            else:
+                puzzles_per_tag_count[tag.name] = {
+                    'count': count,
+                    'url': reverse('puzzle_home')
+                }
         
         context["puzzles_per_tag_count"] = puzzles_per_tag_count
         
@@ -40,4 +49,10 @@ class TagPuzzleListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['tag'] = self.kwargs['tag']
+        context['detail_puzzle'] =  get_object_or_404(Puzzle, id=self.kwargs['pk'])
         return context
+
+class PuzzleDetailView(DetailView):
+    model = Puzzle
+    context_object_name = 'puzzle'
+    template_name = 'puzzles/puzzle_detail.html'

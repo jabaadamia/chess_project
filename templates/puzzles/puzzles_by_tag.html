@@ -4,7 +4,21 @@
     <h1>Puzzles related to "{{ tag }}" tag</h1>
     <ul>
     {% for puzzle in puzzles %}
-        <li>{{ puzzle }}</li>
+        <div>
+            <a href="{% url 'tag_puzzle_list' tag puzzle.id %}">{{ forloop.counter }}</a>
+        </div>
     {% endfor %}
     </ul>
+    
+    {% if detail_puzzle %}
+        <div>
+            <h2>Puzzle</h2>
+            <p>{{ detail_puzzle.description }}</p>
+            <p>{{ detail_puzzle.fen }}</p>
+            <p>{{ detail_puzzle.elo_rating}}</p>
+        </div>
+    {% else %}
+        <p>No puzzles found for this tag.</p>
+    {% endif %}
+  
 {% endblock %}
