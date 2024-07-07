@@ -1,12 +1,21 @@
 {% extends '_base.html' %}
 
 {% block content %}
+    <a href="{% url 'home' %}">home</a>
+    >
+    <a href="{% url 'puzzle_home' %}">categories</a>
     <h1>Puzzles related to "{{ tag }}" tag</h1>
     <ul>
     {% for puzzle in puzzles %}
-        <div>
-            <a href="{% url 'tag_puzzle_list' tag puzzle.id %}">{{ forloop.counter }}</a>
-        </div>
+        {% if puzzle in user.solved_puzzles.all %}
+            <div style="background-color: aquamarine; width: 2rem; height: 1rem;">
+                <a href="{% url 'tag_puzzle_list' tag puzzle.id %}">{{ forloop.counter }}</a>
+            </div>
+        {% else %}
+            <div style="background-color: gray; width: 2rem; height: 1rem;">
+                <a href="{% url 'tag_puzzle_list' tag puzzle.id %}">{{ forloop.counter }}</a>
+            </div>
+        {% endif %}
     {% endfor %}
     </ul>
     
@@ -20,5 +29,13 @@
     {% else %}
         <p>No puzzles found for this tag.</p>
     {% endif %}
+
+    <a href="{% url 'tag_puzzle_list' tag next_puzzle_id %}">next</a>
+    <form method="post">
+        {% csrf_token %}
+        <label for="solution">Enter your solution:</label>
+        <input type="text" id="solution" name="solution" required>
+        <button type="submit">Submit Solution</button>
+    </form>
   
 {% endblock %}

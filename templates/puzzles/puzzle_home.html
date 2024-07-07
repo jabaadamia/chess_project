@@ -3,15 +3,11 @@
 {% block title %}Home{% endblock title %}
 
 {% block content %}
-
+<a href="{% url 'home' %}">home</a>
 <h1>puzzles</h1>
 
 {% if user.is_authenticated %}
     Hi {{ user.email }}!
-    <!--<form action="{% url 'account_logout' %}" method="post">
-        {% csrf_token %}
-        <button type="submit">Logout</button>
-    </form>-->
     <a href="{% url 'account_logout' %}">Log Out</a>
 {% else %}
     <p>You are not logged in</p>
