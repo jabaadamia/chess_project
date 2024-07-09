@@ -26,5 +26,6 @@ urlpatterns = [
 
     # local
     path('', include('pages.urls')),
-    path('puzzles', include('puzzles.urls')),
+    path('puzzles/', include('puzzles.urls')),
+    path('profile/', include('users.urls')),
 ]

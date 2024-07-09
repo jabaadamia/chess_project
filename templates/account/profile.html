@@ -1,0 +1,9 @@
+{% extends '_base.html' %}
+
+{% block content %}
+    <p>{{ user.username }}</p>
+    <p>{{ user.email }}</p>
+    <p>rating: {{ user.rating }}</p>
+    <p>puzzle rating: {{ user.puzzle_rating }}</p>
+    <p>puzzlse solved: {{ user.solved_puzzles.count }}</p>
+{% endblock %}
