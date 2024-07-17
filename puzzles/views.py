@@ -19,18 +19,25 @@ class PuzzleHome(ListView):
 
         for tag in tags:
             tag_puzzles = Puzzle.objects.filter(tags=tag)
+            
             count = tag_puzzles.count()
             first = tag_puzzles.first()
+
             if first:
                 puzzles_per_tag_count[tag.name] = {
                     'count': count,
+                    'user_solved_count': None,
                     'url': reverse('tag_puzzle_list', kwargs={'tag': tag.name, 'pk': first.pk})
                 }
             else:
                 puzzles_per_tag_count[tag.name] = {
                     'count': count,
+                    'user_solved_count': None,
                     'url': reverse('puzzle_home')
                 }
+            # Calculate user solved count per tag
+            if self.request.user.is_authenticated:
+                puzzles_per_tag_count[tag.name]['user_solved_count'] = self.request.user.solved_puzzles.filter(tags=tag).count()
         
         context["puzzles_per_tag_count"] = puzzles_per_tag_count
         

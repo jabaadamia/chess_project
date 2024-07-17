@@ -1,0 +1,40 @@
+h3{
+    color: aliceblue;
+    padding: 2rem;
+}
+
+#tag-container{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 80%;
+}
+
+.tag{
+    display: inline-block;
+    position: relative; 
+    padding: 15px 40px; 
+    background-color: #1F1F1F; 
+    color: white;
+    text-decoration: none; 
+    font-size: 1.5rem;
+    border: 2px solid transparent;
+    border-radius: 4px;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s; /* Smooth transition */
+    margin-top: 1rem;
+}
+
+/* Number styling */
+.tag span {
+    position: absolute; 
+    bottom: 2px;
+    right: 2px; 
+    color: #ffffff;
+    font-size: 12px;
+}
+
+/* Hover effect */
+.tag:hover {
+    background-color: #575757; /* Darker green background on hover */
+}

@@ -1,0 +1,25 @@
+#listbar{
+    display: flex;
+}
+
+#listbar a {
+    flex: 1 1 auto; /* Allow elements to grow and shrink as needed */
+    text-align: center;
+    padding: 2px;
+    box-sizing: border-box;
+    border: 1px solid #313131; /* Optional: Add a border for visual separation */
+    text-decoration: none; /* Optional: Remove underline from links */
+    font-size: larger;
+    color: white;
+}
+
+h3 {
+    font-size: larger;
+    color: white;
+}
+a{
+    color: white;
+}
+p {
+    color: white;
+}

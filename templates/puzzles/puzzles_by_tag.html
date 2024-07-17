@@ -1,27 +1,33 @@
 {% extends '_base.html' %}
 
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'puzzles/css/puzzles_by_tag.css' %}">
+{% endblock %}
+
 {% block content %}
     <a href="{% url 'home' %}">home</a>
     >
     <a href="{% url 'puzzle_home' %}">categories</a>
-    <h1>Puzzles related to "{{ tag }}" tag</h1>
-    <ul>
+    <h3>{{ tag }}</h3>
+    
+    <div id="listbar">
     {% for puzzle in puzzles %}
         {% if puzzle in user.solved_puzzles.all %}
-            <div style="background-color: aquamarine; width: 2rem; height: 1rem;">
-                <a href="{% url 'tag_puzzle_list' tag puzzle.id %}">{{ forloop.counter }}</a>
-            </div>
+            <a href="{% url 'tag_puzzle_list' tag puzzle.id %}" style="background-color: #5B7D5A;">
+                {{ forloop.counter }}
+            </a>
         {% else %}
-            <div style="background-color: gray; width: 2rem; height: 1rem;">
-                <a href="{% url 'tag_puzzle_list' tag puzzle.id %}">{{ forloop.counter }}</a>
-            </div>
+            <a href="{% url 'tag_puzzle_list' tag puzzle.id %}" style="background-color: #4F4F4F;">
+                {{ forloop.counter }}
+            </a>
         {% endif %}
     {% endfor %}
-    </ul>
+    </div>
     
     {% if detail_puzzle %}
         <div>
-            <h2>Puzzle</h2>
             <p>{{ detail_puzzle.description }}</p>
             <p>{{ detail_puzzle.fen }}</p>
             <p>{{ detail_puzzle.elo_rating}}</p>

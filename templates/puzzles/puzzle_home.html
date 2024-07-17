@@ -1,21 +1,43 @@
 {% extends '_base.html' %}
 
+{% load static %}
+
 {% block title %}Home{% endblock title %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'puzzles/css/puzzlehome.css' %}">
+{% endblock %}
+
+
 {% block content %}
-<a href="{% url 'home' %}">home</a>
-<h1>puzzles</h1>
 
-{% if user.is_authenticated %}
-    Hi {{ user.email }}!
-    <a href="{% url 'account_logout' %}">Log Out</a>
-{% else %}
-    <p>You are not logged in</p>
-    <a href="{% url 'account_login' %}">Log In</a>
-    <a href="{% url 'account_signup' %}">Sign Up</a>
-{% endif %}
+<h3>take test (later)</h3>
 
-{% for tag, data in puzzles_per_tag_count.items %}
-<div><a href="{{ data.url }}">{{ tag }}: {{ data.count }}</a></div>
-{% endfor %}
+<h3>puzzles by theme</h3>
+
+<div id="tag-container">
+    {% for tag, data in puzzles_per_tag_count.items %}
+        {% if user.is_authenticated%}
+            
+            {% if data.count == data.user_solved_count %}
+                <a href="{{ data.url }}" class="tag" style="border-bottom-color:   rgb(57, 152, 97);">
+                    {{ tag }}
+                    <span>{{data.user_solved_count}} / {{ data.count }}</span>
+                </a>
+            {% else %}
+                <a href="{{ data.url }}" class="tag">
+                    {{ tag }}
+                    <span>{{data.user_solved_count}} / {{ data.count }}</span>
+                </a>
+            {% endif %}
+
+        {% else %}
+            <a href="{{ data.url }}" class="tag">
+                {{ tag }}
+                <span>{{ data.count }}</span>
+            </a>
+        {% endif %}
+    {% endfor %}
+</div>
+
 {% endblock content %}

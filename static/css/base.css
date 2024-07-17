@@ -1,0 +1,52 @@
+*{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body{
+    background-color: #313131;
+    font-family: "Montserrat", sans-serif;
+}
+
+
+#navbar{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between ;
+    align-items: center;
+    padding-left: 2%;
+    height: 40px;
+    background: linear-gradient(to bottom,#5c5c5c, #4F4F4F,  #313131);
+}
+
+#navbar .barlink{
+    color: #bebebe;
+    text-decoration: none;
+    font-size: 1.5rem;
+}
+#navbar #logo{color: white;}
+
+#login {
+    width: 220px;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+a.button {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #D3E1E2; 
+    color: #011b36; 
+    text-align: center; 
+    text-decoration: none;
+    border-radius: 4px; /* Rounded corners */
+    font-size: 1rem; /* Font size */
+    transition: background-color 0.3s, color 0.3s; /* Smooth transitions */
+}
+
+/* Hover effect */
+a.button:hover {
+    background-color: #94a4a5; /* Darker green */
+}
