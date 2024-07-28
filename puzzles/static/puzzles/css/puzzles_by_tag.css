@@ -1,4 +1,5 @@
 #listbar{
+    padding: 10px 10px 0 10px;
     display: flex;
 }
 
@@ -14,7 +15,7 @@
 }
 
 h3 {
-    font-size: larger;
+    font-size: large;
     color: white;
 }
 a{
@@ -22,4 +23,21 @@ a{
 }
 p {
     color: white;
+}
+
+#puzzle_data {
+    padding-left: 12.5rem;
+}
+
+#puzzle_data div *{
+    display: inline;
+    padding-right: 2rem;
+}
+
+
+#message{
+    padding-top: 5px;
+    padding-bottom: 5px;
+    color: white;
+    font-size: larger;
 }

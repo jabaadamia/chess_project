@@ -3,6 +3,11 @@ from django.urls import reverse
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+from django.http import JsonResponse
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_protect
+import json
+
 from .models import Puzzle, Tag
 
 # view for list of tags
@@ -77,21 +82,68 @@ class TagPuzzleListView(LoginRequiredMixin, ListView):
         context['next_puzzle_id'] = self.get_next_puzzle_id()
         return context
 
+        
+    @method_decorator(csrf_protect)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+
     def post(self, request, *args, **kwargs):
-        puzzle = Puzzle.objects.get(id=self.kwargs['pk'])
-        user_solution = request.POST.get('solution', '').strip()  
+        puzzle = get_object_or_404(Puzzle, id=self.kwargs['pk'])
+        data = json.loads(request.body)
+        current_solution = data.get('current_solution', '').strip()
+        return self.validate_solution(request, puzzle, current_solution)
 
-        #if request.user.solved_puzzles.contains puzzle.pk
+    def validate_solution(self, request, puzzle, current_solution):
+        is_correct = puzzle.solution.lower().startswith(current_solution.lower())
+        is_complete = puzzle.solution.lower() == current_solution.lower()
+        
+        if is_correct:
+            next_move = None
+            if not is_complete:
+                # Get the next move in the solution
+                solution_moves = puzzle.solution.split()
+                current_moves = current_solution.split()
+                if len(solution_moves) > len(current_moves):
+                    next_move = solution_moves[len(current_moves)]
 
-        if user_solution.lower() == puzzle.solution.lower():
-            request.user.solved_puzzles.add(puzzle)
-            request.user.puzzle_rating = self._update_ratings(request.user.puzzle_rating, puzzle.elo_rating, 1)[0]
-            request.user.save(update_fields=['puzzle_rating'])
-            return redirect('tag_puzzle_list', tag=self.kwargs['tag'], pk=self.get_next_puzzle_id())  
+            if is_complete and not request.user.solved_puzzles.filter(id=puzzle.id).exists():
+                request.user.solved_puzzles.add(puzzle)
+                request.user.incorrectly_solved_puzzles.remove(puzzle)
+                new_user_rating, _, rating_change, _ = self._update_ratings(
+                    request.user.puzzle_rating, puzzle.elo_rating, 1)
+                request.user.puzzle_rating = new_user_rating
+                request.user.save(update_fields=['puzzle_rating'])
+            else:
+                rating_change = 0
+            
+            next_puzzle_id = self.get_next_puzzle_id() if is_complete else None
+            return JsonResponse({
+                'correct': True,
+                'complete': is_complete,
+                'next_puzzle_id': next_puzzle_id,
+                'rating_change': rating_change,
+                'next_move': next_move
+            })
         else:
-            request.user.puzzle_rating = self._update_ratings(request.user.puzzle_rating, puzzle.elo_rating, 0)[0]
-            request.user.save(update_fields=['puzzle_rating'])
-            return self.get(request, *args, **kwargs)
+            # Check if the puzzle is not already solved and not in incorrectly solved puzzles
+            if not request.user.solved_puzzles.filter(id=puzzle.id).exists() and \
+               not request.user.incorrectly_solved_puzzles.filter(id=puzzle.id).exists():
+                request.user.incorrectly_solved_puzzles.add(puzzle)
+                # Only update rating for the first incorrect attempt
+                new_user_rating, _, rating_change, _ = self._update_ratings(
+                    request.user.puzzle_rating, puzzle.elo_rating, 0)
+                request.user.puzzle_rating = new_user_rating
+                request.user.save(update_fields=['puzzle_rating'])
+            else:
+                rating_change = 0
+                
+            return JsonResponse({
+                'correct': False,
+                'complete': False,
+                'rating_change': rating_change
+            })
+
 
     def _calculate_rating_change(self, player_rating, opponent_rating, result, k_factor=32):
         """
