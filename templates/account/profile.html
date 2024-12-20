@@ -7,9 +7,11 @@
 {% endblock %}
 
 {% block content %}
-    <p>{{ user.username }}</p>
-    <p>{{ user.email }}</p>
-    <p>rating: {{ user.rating }}</p>
-    <p>puzzle rating: {{ user.puzzle_rating }}</p>
-    <p>puzzlse solved: {{ user.solved_puzzles.count }}</p>
+    <div id="user-data">
+        <p>{{ user.username }}</p>
+        <p>{{ user.email }}</p>
+        <p>rating: {{ user.rating }}</p>
+        <p>puzzle rating: {{ user.puzzle_rating }}</p>
+        <p>puzzles solved: {{ user.solved_puzzles.count }}</p>
+    </div>
 {% endblock %}

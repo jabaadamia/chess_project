@@ -1,0 +1,53 @@
+{% extends '_base.html' %}
+
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'puzzles/css/puzzles_by_tag.css' %}">
+<link rel="stylesheet" href="{% static 'css/board.css' %}">
+{% endblock %}
+
+{% block content %}
+    <a href="{% url 'home' %}">home</a>
+    >
+    <a href="{% url 'puzzle_home' %}">categories</a>
+    
+
+    <main id="container">
+        {% include 'puzzles/_board.html' %}
+        <div>
+            <div id="pgn" onclick="pgn_click(event)"></div>
+        </div>
+    </main>
+    <br>
+    <button id="saveGameButton" onclick="saveGame()">Save Game</button>
+
+    <script>
+        let start_fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+        const csrftoken = '{{ csrf_token }}';
+
+        function saveGame() {
+            console.log("Save button clicked!");
+            fetch(window.location.href, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                },
+                body: JSON.stringify({ save_game: true }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        alert(data.message);
+                    } else {
+                        console.error(data.error);
+                    }
+                })
+                .catch(error => console.error('Error:', error));    
+        }
+
+    </script>
+    <script type="module" src="{% static 'js/game.js' %}"></script>
+  
+{% endblock %}

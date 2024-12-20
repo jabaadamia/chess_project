@@ -4,7 +4,7 @@ import { Board, icons } from "./board.js";
 //movesound.volume = 0.4;
 let from_tos = []
 let notation = [];
-let pgn = document.getElementById('pgn');
+let pgn = '';
 
 
 window.firstmove = firstmove;

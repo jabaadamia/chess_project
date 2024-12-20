@@ -26,6 +26,7 @@ urlpatterns = [
 
     # local
     path('', include('pages.urls')),
+    path('study/', include('studies.urls')),
     path('puzzles/', include('puzzles.urls')),
     path('profile/', include('users.urls')),
 ]

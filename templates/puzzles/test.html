@@ -1,0 +1,77 @@
+{% extends '_base.html' %}
+
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'puzzles/css/puzzles_by_tag.css' %}">
+<link rel="stylesheet" href="{% static 'css/board.css' %}">
+{% endblock %}
+
+{% block content %}
+    <a href="{% url 'home' %}">home</a>
+    >
+    <a href="{% url 'puzzle_home' %}">categories</a>
+    
+    <div id="listbar">
+    {% for puzzle in puzzles %}
+        {% if puzzle == detail_puzzle %}
+            {% if puzzle in user.solved_puzzles.all %}
+                <a href="{% url 'puzzle_test' forloop.counter  %}" style="background-color: #5B7D5A; box-shadow: inset 0 0 0 1px rgb(103, 198, 126);">
+                    {{ forloop.counter }}
+                </a>
+            {% elif puzzle in user.incorrectly_solved_puzzles.all %}
+                <a href="{% url 'puzzle_test' forloop.counter %}" style="background-color: #994f4f; box-shadow: inset 0 0 0 1px rgb(255, 73, 73);">
+                    {{ forloop.counter }}
+                </a>
+            {% else %}
+                <a href="{% url 'puzzle_test' forloop.counter %}" style="background-color: #4F4F4F; box-shadow: inset 0 0 0 1px rgb(186, 186, 186);">
+                    {{ forloop.counter }}
+                </a>
+            {% endif %}
+        {% else %}
+            {% if puzzle in user.solved_puzzles.all %}
+                <a href="{% url 'puzzle_test' forloop.counter %}" style="background-color: #5B7D5A;">
+                    {{ forloop.counter }}
+                </a>
+            {% elif puzzle in user.incorrectly_solved_puzzles.all %}
+                <a href="{% url 'puzzle_test' forloop.counter %}" style="background-color: #994f4f;">
+                    {{ forloop.counter }}
+                </a>
+            {% else %}
+                <a href="{% url 'puzzle_test' forloop.counter  %}" style="background-color: #4F4F4F;">
+                    {{ forloop.counter }}
+                </a>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+    </div>
+    
+    {% if detail_puzzle %}
+
+    <main id="container">
+        {% include 'puzzles/_board.html' %}
+        <div>
+            <div id="pgn" onclick="pgn_click(event)"></div>
+            <div id="puzzle_data"> 
+                <div id="message"></div>
+                <div>
+                    <p>rating: {{ detail_puzzle.elo_rating}}</p>
+                    <a href="{% url 'puzzle_test' next_puzzle_id %}">next</a>
+                </div>
+            </div>
+        </div>
+    </main>
+                    
+    {% else %}
+        <p>No puzzles found for this tag.</p>
+    {% endif %}
+  
+    <script>
+        let ans = '{{ detail_puzzle.solution }}';
+        let start_fen = '{{ detail_puzzle.fen }}';
+        const tag = 'test';
+        const puzzleId = '{{ detail_puzzle.id }}';
+        const csrftoken = '{{ csrf_token }}';
+    </script>
+    <script type="module" src="{% static 'js/puzzle.js' %}"></script>
+{% endblock %}

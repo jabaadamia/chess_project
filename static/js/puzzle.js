@@ -255,11 +255,17 @@ async function submitMove(move) {
     })
     .then(response => response.json())
     .then(async data => {
+        if (data.redirect) {
+            // If server indicates a redirect, perform it
+            window.location.href = data.url;
+            return;
+        }
         if (data.correct) {
             if (data.complete) {
                 message.innerText = '✓  Puzzle solved! '+' Rating change: ' + data.rating_change;
                 if (data.next_puzzle_id) {
                 //     // Load next puzzle or redirect
+                    console.log(data)
                     await sleep(500);
                     window.location.href = `/puzzles/${tag}/${data.next_puzzle_id}`;
                 }

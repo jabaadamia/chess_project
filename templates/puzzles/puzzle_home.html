@@ -11,11 +11,12 @@
 
 {% block content %}
 
-<h3>take test (later)</h3>
-
-<h3>puzzles by theme</h3>
-
-<div id="tag-container">
+<div id="main-container">
+    
+    <div>
+    <div class="title"><h3>Puzzles By Theme</h3></div>
+    <div id="tag-container">
+    
     {% for tag, data in puzzles_per_tag_count.items %}
         {% if user.is_authenticated%}
             
@@ -38,6 +39,24 @@
             </a>
         {% endif %}
     {% endfor %}
+    </div>
+    </div>
+    
+    <div>
+        <div class="title"><h3>Take Test</h3></div>
+        <div id="test-container">
+            <form method="get" action="{% url 'puzzle_test' 1 %}">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" id="test-button">start test</button>
+            </form>
+        </div>
+    </div>
+    
+
 </div>
+
+
+
 
 {% endblock content %}

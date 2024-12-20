@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'pages.apps.PagesConfig',
     'puzzles.apps.PuzzlesConfig',
+    'studies.apps.StudiesConfig',
 ]
 
 # django-allauth config
