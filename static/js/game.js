@@ -3,7 +3,7 @@ import { Board, icons } from "./board.js";
 const movesound = new Audio('/static/images/move.mp3');
 movesound.volume = 0.7;
 
-let from_tos = [];
+//from_tos = from_tos ? from_tos : [] ;
 let pgn = document.getElementById('pgn');
 
 //let message = document.getElementById('message');
@@ -25,6 +25,73 @@ let b = new Board(start_fen);
 // message.innerText = b.move == 'w' ? 'white to play' : 'black to play';
 
 let cur_move = 0;
+
+
+function parsePGN(pgn) {
+    // Remove headers
+    let moves = pgn.replace(/\[.*?\]\s*/g, "").trim();  // Removes headers
+    moves = moves.replace(/\d+\.\s+/g, ""); // Removes move numbering if needed
+
+    // Split moves by spaces
+    let moveList = moves.split(/\s+/);
+
+    if (moveList[moveList.length - 1] === "*") {
+        moveList.pop();  // Removes the last element (the asterisk)
+    }
+
+    return moveList;
+}
+// render png panel when loading new game
+function renderPGN(pgn_str) {
+
+    const moveList = parsePGN(pgn_str);
+
+    let b = { half_moves: 1, full_moves: 1, move: 'w' };  // Initial values for black and white turns
+    let fullmovediv = document.createElement('div');
+    fullmovediv.id = 'move' + b.full_moves;
+    moveList.forEach((move, index) => {
+
+        const m = document.createElement('p');
+        m.style.position = 'absolute';
+        m.innerText = move;
+        m.id = 'm' + b.half_moves;
+
+        if (b.move === 'w') {
+            let fullmovediv = document.createElement('div');
+            fullmovediv.id = 'move' + b.full_moves;
+            const movenum = document.createElement('p');
+            movenum.innerText = b.full_moves + '.';
+            fullmovediv.appendChild(movenum);
+            m.style.left = '70px';
+            fullmovediv.appendChild(m);
+            pgn.appendChild(fullmovediv);
+        } else {
+            try {
+                let fullmovediv = document.getElementById('move' + (b.full_moves - 1));
+                m.style.left = '180px';
+                fullmovediv.appendChild(m);
+            } catch (error) { // first move is black
+                let fullmovediv = document.createElement('div');
+                fullmovediv.id = 'move' + (b.full_moves - 1);
+                pgn.appendChild(fullmovediv);
+                m.style.left = '180px';
+                fullmovediv.appendChild(m);
+            }
+        }
+
+        // Alternate turns
+        if (b.move === 'w') {
+            b.move = 'b'; // Switch to black's turn
+            b.full_moves++;
+            b.half_moves++;
+        } else {
+            b.move = 'w'; // Switch to white's turn
+            b.half_moves++;
+        }
+    });
+}
+
+if (pgn_str != ''){renderPGN(pgn_str)}
 
 let is_rotated = false;
 if(b.move == 'b'){
@@ -245,6 +312,7 @@ function getIds(move) {
 async function addMove(move) {
     try {
         console.log("Current move:", cur_move,"New move:", move);
+        console.log("pgn", pgn_str, from_tos)
         
         // Send a POST request to the Django view with the move data
         const response = await fetch(window.location.href, {
@@ -340,7 +408,8 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_s
                 }
 
                 b.make_move(parseInt(start_square_id), parseInt(square_id), b.board, b.move, e.target.className);
-
+                move_puzzle_format+=e.target.className.toLowerCase();
+                
                 if (b.is_check(b.move)){
                     move += '+';
                 }

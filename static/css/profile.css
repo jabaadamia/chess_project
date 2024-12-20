@@ -1,6 +1,15 @@
+a{
+    text-decoration: none;
+}
+
+#container{
+    display: flex;
+    justify-content: space-between;
+    padding: 3%;
+}
+
 #user-data{
-    margin-top: 2rem;
-    padding-left: 5rem;
+    padding: 0 3rem;
     width: 15rem;
     height: 80vh;
     background-color: #1F1F1F;
@@ -9,6 +18,36 @@
     align-items: start;
 }
 
+#games{
+    width: 40%;
+    height: 80vh;
+    border: 1px solid gray;
+    overflow-y: auto;
+}
+
+#games h2 {
+    font-size: 1.5em;
+    color: #ffffff;
+    text-align: center;
+}
+
+#games a div{
+    width: 100%;
+    height: 50px;
+    padding-top: 20px;
+    background-color: #1F1F1F;
+    border: solid 1px rgb(100, 100, 100);
+}
+#games a div p{
+    display: inline;
+    padding-left: 10%;
+}
+
+#games a div:hover {
+    background-color: #3b3b3b;
+    color: white;
+    cursor: pointer; /* Change cursor to pointer */
+}
 p {
     margin-top: 3rem;
     color: white;

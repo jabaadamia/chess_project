@@ -23,7 +23,10 @@
     <button id="saveGameButton" onclick="saveGame()">Save Game</button>
 
     <script>
-        let start_fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+        let start_fen = '{{fen}}';
+        let pgn_str = '{{ pgn|escapejs }}';
+        let from_tos = JSON.parse('{{ from_to|escapejs }}');;
+        //console.log(pgn_str)
         const csrftoken = '{{ csrf_token }}';
 
         function saveGame() {

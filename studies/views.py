@@ -4,6 +4,8 @@ import io
 import uuid
 from datetime import datetime
 import json
+
+from django.shortcuts import get_object_or_404, render
 from django.http.response import JsonResponse
 from django.views.generic import DetailView, TemplateView
 
@@ -13,11 +15,42 @@ from .models import Game
 class AnalyzeBoard(TemplateView):
     template_name = 'studies/analyze.html'
 
+    def _create_from_to_array(self, game):
+        # Parse the PGN string into a chess game object
+        #game = chess.pgn.read_game(io.StringIO(pgn))
+
+        from_to = []
+
+        # Iterate through the game moves
+        board = game.board()
+        for move in game.mainline_moves():
+            # For each move, extract the "from" and "to" squares
+            from_square = 10*(move.from_square % 8 + 1)+move.from_square // 8 + 1
+            to_square = 10*(move.to_square % 8 + 1)+move.to_square // 8 + 1
+
+            # Append the move as a tuple (from, to)
+            from_to.append([from_square, to_square])
+
+            # Make the move on the board
+            board.push(move)
+
+        return from_to
+
     def get(self, request, *args, **kwargs):
-        """Reset the session FEN to the starting position on page load."""
-        request.session['fen'] = chess.STARTING_FEN
-        request.session['game_pgn'] = False
-        return super().get(request, *args, **kwargs)
+        """Reset the session FEN to the starting position or set up opened game """
+        
+        game_id = kwargs.get('game_id')  
+        if game_id:
+            game = get_object_or_404(Game, id=game_id)
+            request.session['fen'] = chess.STARTING_FEN
+            request.session['game_pgn'] = game.pgn
+            game = chess.pgn.read_game(io.StringIO(game.pgn))
+            game.headers.clear()
+            return render(request, 'studies/analyze.html', {'fen': chess.STARTING_FEN, 'pgn': game, 'from_to':json.dumps(self._create_from_to_array(game))})
+        else:
+            request.session['fen'] = chess.STARTING_FEN
+            request.session['game_pgn'] = False
+        return render(request, 'studies/analyze.html', {'fen': chess.STARTING_FEN, 'pgn': '', 'from_to':[]})
 
     def post(self, request, *args, **kwargs):
         """Process a move and save game."""

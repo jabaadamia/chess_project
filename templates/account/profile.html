@@ -7,6 +7,8 @@
 {% endblock %}
 
 {% block content %}
+
+<div id="container">
     <div id="user-data">
         <p>{{ user.username }}</p>
         <p>{{ user.email }}</p>
@@ -14,4 +16,18 @@
         <p>puzzle rating: {{ user.puzzle_rating }}</p>
         <p>puzzles solved: {{ user.solved_puzzles.count }}</p>
     </div>
+
+    <div id="games">
+        <h2>Saved Games</h2>
+        {% for game in saved_games %}
+            <a href="{% url 'analyze_game' game.id %}"><div>
+                <p>title </p>
+                <p>{{ game.result }}</p>
+                <p>{{game.updated_at}}</p>
+            
+            </div></a>
+        {% endfor %}
+    </div>
+</div>
+
 {% endblock %}
