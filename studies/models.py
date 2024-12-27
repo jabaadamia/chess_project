@@ -5,6 +5,7 @@ from django.db import models
 
 class Game(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="games")
+    title = models.CharField(max_length=255, blank=True, null=True)
     pgn = models.TextField()  # Store the game in PGN format
     result = models.CharField(max_length=10, choices=[('1-0', 'White Wins'), ('0-1', 'Black Wins'), ('1/2-1/2', 'Draw'), ('*', 'Ongoing')], blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -23,7 +23,7 @@
             <a href="{% url 'analyze_game' game.id %}"><div>
                 <p>title </p>
                 <p>{{ game.result }}</p>
-                <p>{{game.updated_at}}</p>
+                <p>{{ game.updated_at|date:"Y-m-d" }}</p>
             
             </div></a>
         {% endfor %}

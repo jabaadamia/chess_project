@@ -5,7 +5,8 @@ import uuid
 from datetime import datetime
 import json
 
-from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+from django.shortcuts import get_object_or_404, render, redirect
 from django.http.response import JsonResponse
 from django.views.generic import DetailView, TemplateView
 
@@ -42,6 +43,10 @@ class AnalyzeBoard(TemplateView):
         game_id = kwargs.get('game_id')  
         if game_id:
             game = get_object_or_404(Game, id=game_id)
+
+            if game.user != request.user:
+                return JsonResponse({"error": "You are not authorized to access this game"}, status=403)
+
             request.session['fen'] = chess.STARTING_FEN
             request.session['game_pgn'] = game.pgn
             game = chess.pgn.read_game(io.StringIO(game.pgn))
@@ -72,7 +77,11 @@ class AnalyzeBoard(TemplateView):
             fen = request.session.get('fen', chess.STARTING_FEN)
             board = chess.Board(fen)
 
-            if save_game_flag :
+            if save_game_flag:
+                if not request.user.is_authenticated:
+                    # Redirect the user to the login page (OAuth login flow)
+                    return redirect(reverse('account_login') + f'?next={request.path}')
+                
                 # Save the game to the database
                 Game.objects.create(
                     user=request.user,
@@ -100,11 +109,12 @@ class AnalyzeBoard(TemplateView):
                     node = game
                 node = node.add_main_variation(move)
                 
-                game_pgn = game.accept(chess.pgn.StringExporter())
+                game_pgn = game.accept(chess.pgn.StringExporter(headers=None))
                 request.session['game_pgn'] = game_pgn
 
                 # Return the updated FEN and the legal moves from the current position
                 return JsonResponse({
+                    "pgn": game_pgn,
                     "fen": board.fen(),
                     "legal_moves": [move.uci() for move in board.legal_moves],  # List of legal moves
                 })

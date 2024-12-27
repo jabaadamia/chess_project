@@ -21,12 +21,17 @@
     </main>
     <br>
     <button id="saveGameButton" onclick="saveGame()">Save Game</button>
+    
+    <label for="exampleText">pgn:</label>
+    <textarea id="pgn_textarea" name="userMove" placeholder="Enter your move..." rows="4" cols="50"></textarea>
+
+    <button id="printButton" style="display: none;">Print Text</button>
 
     <script>
         let start_fen = '{{fen}}';
         let pgn_str = '{{ pgn|escapejs }}';
         let from_tos = JSON.parse('{{ from_to|escapejs }}');;
-        //console.log(pgn_str)
+  
         const csrftoken = '{{ csrf_token }}';
 
         function saveGame() {
@@ -39,7 +44,13 @@
                 },
                 body: JSON.stringify({ save_game: true }),
             })
-                .then(response => response.json())
+                .then(response => {
+                    if (response.redirected) {
+                        window.location.href = response.url;  // Redirect to login or any other page
+                    } else {
+                        return response.json();
+                    }
+                })
                 .then(data => {
                     if (data.message) {
                         alert(data.message);

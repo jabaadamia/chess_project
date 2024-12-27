@@ -5,7 +5,8 @@ movesound.volume = 0.7;
 
 //from_tos = from_tos ? from_tos : [] ;
 let pgn = document.getElementById('pgn');
-
+const pgn_text_area = document.getElementById('pgn_textarea');
+const printButton = document.getElementById('printButton');
 //let message = document.getElementById('message');
 
 //let currentSolution = '';
@@ -91,7 +92,9 @@ function renderPGN(pgn_str) {
     });
 }
 
-if (pgn_str != ''){renderPGN(pgn_str)}
+if (pgn_str != ''){
+    pgn_text_area.value = pgn_str;
+    renderPGN(pgn_str)}
 
 let is_rotated = false;
 if(b.move == 'b'){
@@ -305,14 +308,13 @@ function getIds(move) {
     const to = b.to_id(move.slice(2, 4));
     
     return [from, to];
-  }
-  
+}
 
 
 async function addMove(move) {
     try {
         console.log("Current move:", cur_move,"New move:", move);
-        console.log("pgn", pgn_str, from_tos)
+        console.log("pgn", from_tos)
         
         // Send a POST request to the Django view with the move data
         const response = await fetch(window.location.href, {
@@ -331,8 +333,8 @@ async function addMove(move) {
         // Check if the response was successful
         if (response.ok) {
             const data = await response.json();
-            console.log("Move processed successfully:", data);
-            // Optionally, update the board display or any other UI element here
+            pgn_text_area.value = data.pgn;
+            console.log("Move processed successfully:");
         } else {
             console.error("Error processing move:", response);
         }
@@ -501,3 +503,17 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_s
     valid_moves = [];
 }
 
+
+// pgn_textarea.addEventListener('input', function() {
+//     // If the textarea has any text, show the button
+//     if (pgn_textarea.value.trim() !== '') {
+//         printButton.style.display = 'inline';  // Show the button
+//     } else {
+//         printButton.style.display = 'none';  // Hide the button if textarea is empty
+//     }
+// });
+// printButton.addEventListener('click', printText);
+// function printText() {
+//     const text = pgn_textarea.value;  // Get the text from the textarea
+//     renderPGN(text);
+// }
