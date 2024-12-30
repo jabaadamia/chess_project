@@ -22,12 +22,3 @@ class Game(models.Model):
             self.user = user
         self.updated_at = now()
         self.save()
-
-# class Move(models.Model):
-#     game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name="moves")
-#     move_number = models.IntegerField()
-#     color = models.CharField(max_length=1, choices=[('w', 'White'), ('b', 'Black')])
-#     move = models.CharField(max_length=10) # 
-#     fen = models.CharField(max_length=100)
-#     evaluation = models.FloatField(blank=True, null=True)
-#     previous_move = models.ForeignKey('self', null=True, blank=True, related_name='next_moves', on_delete=models.SET_NULL)
