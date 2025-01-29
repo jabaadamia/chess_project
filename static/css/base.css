@@ -1,31 +1,88 @@
-*{
-    /* box-sizing: border-box; */
+* {
     margin: 0;
     padding: 0;
 }
 
-body{
+body {
     background-color: #313131;
     font-family: "Montserrat", sans-serif;
 }
 
-
-#navbar{
+#navbar {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between ;
+    justify-content: space-between;
     align-items: center;
-    padding-left: 2%;
-    height: 40px;
-    background: linear-gradient(to bottom,#5c5c5c, #4F4F4F,  #313131);
+    padding: 0 2%;
+    height: 50px;
+    background: linear-gradient(to bottom, #5c5c5c, #4F4F4F, #313131);
+    position: relative;
 }
 
-#navbar .barlink{
-    color: #bebebe;
-    text-decoration: none;
-    font-size: 1.5rem;
+
+#menu {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 50%;
+    gap: 20px;
+    transition: transform 0.5s ease, opacity 0.3s ease;
 }
-#navbar #logo{color: white;}
+
+.barlink {
+    color: white;
+    text-decoration: none;
+}
+
+#hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+}
+
+#hamburger span {
+    width: 25px;
+    height: 3px;
+    background-color: white;
+}
+
+/* Responsive Menu */
+@media (max-width: 768px) {
+    #menu {
+        position: fixed;
+        top: 50px;
+        right: 0;
+        width: 250px;
+        height: 80vh;
+        background-color: #313131;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 20px;
+        
+        /* Hidden state */
+        transform: translateX(100%);
+        opacity: 0;
+        visibility: hidden;
+        transition: transform 0.5s ease, opacity 0.3s ease;
+    }
+
+    #hamburger {
+        display: flex;
+    }
+
+    /* When menu is active */
+    #menu.active {
+        transform: translateX(0);
+        opacity: 1;
+        visibility: visible;
+        z-index: 1000;
+    }
+
+    #navbar.active #hamburger span {
+        background-color: black;
+    }
+}
+
 
 #login {
     padding-right: 2rem;
@@ -51,4 +108,10 @@ a.button {
 /* Hover effect */
 a.button:hover {
     background-color: #94a4a5; /* Darker green */
+}
+
+#logo{
+    width: 70px;
+    height: 70px;
+    margin-top: 10px;
 }

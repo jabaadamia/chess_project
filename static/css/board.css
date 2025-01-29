@@ -48,36 +48,6 @@
     user-select: none;
 }
 
-#pgn{
-    position: relative;
-    width: 300px;
-    height: 480px;
-    left: 200px;
-    padding-left: 10px;
-    border: 1px solid gray;
-    overflow-y: auto;
-}
-#pgn div{
-    display: flex;
-    width: 200px;
-    height: 30px;
-    font-size: larger;
-}
-
-#toolbar{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    width: 484px;
-    left: 100px;
-
-}
-#toolbar div img{
-    width: 40px;
-    height: 40px;
-}
-
 .white-square {
     width: 60px;
     height: 60px; 
@@ -92,9 +62,94 @@
 
 
 .circle {
-    width: 15px; /* Adjust the size as needed */
-    height: 15px; /* Adjust the size as needed */
+    width: 18px; 
+    height: 18px; 
     background-color: #3c3c3c7b;
     border-radius: 50%;
-    
+}
+
+/* Toolbar styling */
+#toolbar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    left: 100px;
+    background-color: #383838;
+    border-radius: 0 0 8px 8px;
+    padding: 2px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#toolbar div {
+    margin: 0 10px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+/* Hover effect for toolbar icons */
+#toolbar div:hover {
+    transform: scale(1.2);
+}
+
+#toolbar img {
+    width: 32px;
+    height: 32px;
+    filter: brightness(0) invert(1);
+}
+
+/* Styling for the PGN container */
+#pgn {
+    position: relative;
+    width: 300px;
+    height: 480px;
+    left: 200px;
+    padding-top: 0px;
+    border: 1px solid #555;
+    background-color: #383838; 
+    color: #E0E0E0;
+    overflow-y: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Style for each div inside the PGN area */
+#pgn div {
+    display: flex;
+    justify-content: space-between;
+    width: 100%; 
+    height: 20px;
+    padding: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    border-bottom: 1px solid #444;
+}
+
+/* Hover effect for PGN divs */
+#pgn div:hover {
+    background-color: #555;
+}
+
+/* For responsiveness (smaller screens) */
+@media screen and (max-width: 600px) {
+    #pgn {
+        width: 80%;
+        left: 10%;
+    }
+
+    #toolbar {
+        width: 90%;
+    }
+}
+
+.pgn-move {
+    position: absolute;
+    cursor: pointer; 
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transition */
+}
+
+/* Hover effect */
+.pgn-move:hover {
+    color: white; /* Change text color to white */
+    transform: scale(1.1); /* Slightly scale up the element */
 }

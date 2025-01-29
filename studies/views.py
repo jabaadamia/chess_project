@@ -1,7 +1,6 @@
 import chess
 import chess.pgn
 import io
-import uuid
 from datetime import datetime
 import json
 

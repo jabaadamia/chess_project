@@ -8,10 +8,8 @@
 {% endblock %}
 
 {% block content %}
-    <a href="{% url 'home' %}">home</a>
-    >
-    <a href="{% url 'puzzle_home' %}">categories</a>
-    <h3>{{ tag }}</h3>
+
+    <h3 style="margin-left: 10px;">{{ tag }}</h3>
     
     <div id="listbar">
     {% for puzzle in puzzles %}

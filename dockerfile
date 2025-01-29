@@ -12,5 +12,9 @@ WORKDIR /code
 COPY Pipfile Pipfile.lock /code/
 RUN pip install pipenv && pipenv install --system --deploy --ignore-pipfile
 
+# Install Git and other necessary utilities
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
+
 # Copy project
 COPY . /code/

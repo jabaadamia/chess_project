@@ -53,9 +53,10 @@ function renderPGN(pgn_str) {
     moveList.forEach((move, index) => {
 
         const m = document.createElement('p');
-        m.style.position = 'absolute';
+        //m.style.position = 'absolute';
         m.innerText = move;
         m.id = 'm' + b.half_moves;
+        m.classList.add('pgn-move');
 
         if (b.move === 'w') {
             let fullmovediv = document.createElement('div');
@@ -421,9 +422,10 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_s
 
                 if (!forpgnnav){
                     const m = document.createElement('p');
-                    m.style.position = 'absolute'
+                    //m.style.position = 'absolute'
                     m.innerText = move;
                     m.id = 'm'+b.half_moves;
+                    m.classList.add('pgn-move');
                     if (b.move == 'b'){
                         let fullmovediv = document.createElement('div');
                         fullmovediv.id = 'move'+b.full_moves;
@@ -462,9 +464,10 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_s
             
             if (!forpgnnav){
                 const m = document.createElement('p');
-                m.style.position = 'absolute';
+                //m.style.position = 'absolute';
                 m.innerText = move;
                 m.id = 'm'+b.half_moves;
+                m.classList.add('pgn-move');
                 if (b.move == 'b'){
                     let fullmovediv = document.createElement('div');
                     fullmovediv.id = 'move'+b.full_moves;

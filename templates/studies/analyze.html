@@ -5,13 +5,10 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'puzzles/css/puzzles_by_tag.css' %}">
 <link rel="stylesheet" href="{% static 'css/board.css' %}">
+<link rel="stylesheet" href="{% static 'css/analyze.css' %}">
 {% endblock %}
 
 {% block content %}
-    <a href="{% url 'home' %}">home</a>
-    >
-    <a href="{% url 'puzzle_home' %}">categories</a>
-    
 
     <main id="container">
         {% include 'puzzles/_board.html' %}
@@ -19,13 +16,18 @@
             <div id="pgn" onclick="pgn_click(event)"></div>
         </div>
     </main>
-    <br>
+    <!-- <br>
     <button id="saveGameButton" onclick="saveGame()">Save Game</button>
     
     <label for="exampleText">pgn:</label>
-    <textarea id="pgn_textarea" name="userMove" placeholder="Enter your move..." rows="4" cols="50"></textarea>
+    <textarea id="pgn_textarea" name="userMove" rows="4" cols="50"></textarea>
 
-    <button id="printButton" style="display: none;">Print Text</button>
+    <button id="printButton" style="display: none;">Print Text</button> -->
+    <div class="savecontainer">
+        <label for="exampleText">PGN:</label>
+        <textarea id="pgn_textarea" name="userMove" rows="4" cols="50"></textarea>
+    </div>
+    <button id="saveGameButton" onclick="saveGame()">Save Game</button>
 
     <script>
         let start_fen = '{{fen}}';
