@@ -26,3 +26,4 @@ Platform designed for chess enthusiasts to improve their skills. This platform p
 
 ## Demo
 ![Platform Demo](chess.gif)
+
