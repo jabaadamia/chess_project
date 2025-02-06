@@ -231,13 +231,13 @@ function visualise_valid_squares(valid_moves, remove){
             const circle = square.querySelector('.circle');
             if (circle) {
                 square.removeChild(circle);
-            }
+            }else{square.style.backgroundColor = ''}
         }else{
             if (square.children.length === 0) {
                 const circle = document.createElement('div');
                 circle.className = 'circle';
                 square.appendChild(circle);
-            }
+            }else{square.style.backgroundColor = '#f5a142';}
         }
     });
 }
@@ -254,7 +254,7 @@ function get_square_id(top, left){
 // when piece is grabed
 function dragMouseDown(e) {
     // prevent adding new move branch
-    //if (cur_move !== from_tos.length){return}
+    if (cur_move !== from_tos.length){return}
 
     valid_moves = b.valid_moves_of(parseInt(this.parentNode.id), false, b.board, b.move, this.className.toLowerCase());
     start_square_id = this.parentNode.id;
@@ -314,8 +314,8 @@ function getIds(move) {
 
 async function addMove(move) {
     try {
-        console.log("Current move:", cur_move,"New move:", move);
-        console.log("pgn", from_tos)
+        // console.log("Current move:", cur_move,"New move:", move);
+        // console.log("pgn", from_tos)
         
         // Send a POST request to the Django view with the move data
         const response = await fetch(window.location.href, {
@@ -335,9 +335,9 @@ async function addMove(move) {
         if (response.ok) {
             const data = await response.json();
             pgn_text_area.value = data.pgn;
-            console.log("Move processed successfully:");
+            // console.log("Move processed successfully:");
         } else {
-            console.error("Error processing move:", response);
+            // console.error("Error processing move:", response);
         }
     } catch (error) {
         console.error("Error:", error);
@@ -386,11 +386,9 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_s
             }
         }
 
-        // for choosing which piece to promote and making move
-        if (promotion){
-            document.getElementById(start_square_id).innerHTML = '';
-
+        if (promotion){            
             if(forpgnnav){
+                document.getElementById(start_square_id).innerHTML = '';
                 document.getElementById(square_id).innerHTML = icons.get(forpgnnav);
                 b.make_move(parseInt(start_square_id), parseInt(square_id), b.board, b.move, forpgnnav);
                 add_drag(b.move);
@@ -398,10 +396,12 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_s
             }
 
             document.getElementById('promotion-bar').onclick = function(e){
+                e.stopPropagation();
                 document.getElementById(square_id).innerHTML = '';
                 document.getElementById('promotion-bar').style.visibility = 'hidden';
                 let move;
                 if (e.target.tagName == 'IMG'){
+                    document.getElementById(start_square_id).innerHTML = '';
                     document.getElementById(square_id).appendChild(e.target);
                     move = b.to_readable(square_id)+'='+e.target.className.toUpperCase();
                 }
@@ -411,8 +411,7 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_s
                 }
 
                 b.make_move(parseInt(start_square_id), parseInt(square_id), b.board, b.move, e.target.className);
-                move_puzzle_format+=e.target.className.toLowerCase();
-                
+
                 if (b.is_check(b.move)){
                     move += '+';
                 }
@@ -422,7 +421,7 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_s
 
                 if (!forpgnnav){
                     const m = document.createElement('p');
-                    //m.style.position = 'absolute'
+                    m.style.position = 'absolute'
                     m.innerText = move;
                     m.id = 'm'+b.half_moves;
                     m.classList.add('pgn-move');
@@ -438,18 +437,37 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_s
                         from_tos.push([parseInt(start_square_id), square_id, move[3]]); 
                     }else{
                         let fullmovediv = document.getElementById('move'+(b.full_moves-1));
+                        if(!fullmovediv){
+                            fullmovediv = document.createElement('div');
+                            fullmovediv.id = 'move'+b.full_moves;
+                            const movenum = document.createElement('p');
+                            movenum.innerText = b.full_moves+'.';
+                            fullmovediv.appendChild(movenum);
+                            pgn.appendChild(fullmovediv);
+                        }
                         m.style.left = '180px';
                         fullmovediv.appendChild(m);
                         from_tos.push([parseInt(start_square_id), square_id, move[3].toLowerCase()]);
                     }
                     cur_move++;
-                    
-                    addMove(move_puzzle_format);
+                    if (to_submit){
+                        submitMove(move_puzzle_format);
+                    }
                 }
                 
                 movesound.play();
                 add_drag(b.move);
             }
+            const hide = function (e) {
+                const bar = document.getElementById('promotion-bar');
+                if (bar.style.visibility !== 'hidden' && !bar.contains(e.target)) {
+                    bar.style.visibility = 'hidden';
+                }
+            };
+            setTimeout(() => {
+                document.getElementById('wrapper').addEventListener('mousedown', hide);
+            }, 100);
+            
         }else{ // moves other than promotion
             document.getElementById(square_id).innerHTML = document.getElementById(start_square_id).innerHTML;
             document.getElementById(start_square_id).innerHTML = '';
@@ -505,18 +523,3 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_s
     visualise_valid_squares(valid_moves, true);
     valid_moves = [];
 }
-
-
-// pgn_textarea.addEventListener('input', function() {
-//     // If the textarea has any text, show the button
-//     if (pgn_textarea.value.trim() !== '') {
-//         printButton.style.display = 'inline';  // Show the button
-//     } else {
-//         printButton.style.display = 'none';  // Hide the button if textarea is empty
-//     }
-// });
-// printButton.addEventListener('click', printText);
-// function printText() {
-//     const text = pgn_textarea.value;  // Get the text from the textarea
-//     renderPGN(text);
-// }

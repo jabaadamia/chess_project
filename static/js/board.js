@@ -687,14 +687,14 @@ export class Board {
         
         if(piece == 'K'){
             this.wking_pos = to;
-            if(to == 71 && this.cur_white_castles[0]){
+            if(from == 51 && to == 71 && this.cur_white_castles[0]){
                 board[7][5] = 'R';
                 board[7][7] = null;
                 document.getElementById(61).innerHTML = document.getElementById(81).innerHTML;
                 document.getElementById(81).innerHTML = '';
                 move_pgn = '0-0'
             }
-            if(to == 31 && this.cur_white_castles[1]){
+            if(from == 51 && to == 31 && this.cur_white_castles[1]){
                 board[7][3] = 'R';
                 board[7][0] = null;
                 document.getElementById(41).innerHTML = document.getElementById(11).innerHTML;
@@ -707,14 +707,14 @@ export class Board {
         }
         if(piece == 'k'){
             this.bking_pos = to;
-            if(to == 78 && this.cur_black_castles[0]){
+            if(from == 58 && to == 78 && this.cur_black_castles[0]){
                 board[0][5] = 'r';
                 board[0][7] = null;
                 document.getElementById(68).innerHTML = document.getElementById(88).innerHTML;
                 document.getElementById(88).innerHTML = '';
                 move_pgn = '0-0'
             }
-            if(to == 38 && this.cur_black_castles[1]){
+            if(from == 58 && to == 38 && this.cur_black_castles[1]){
                 board[0][3] = 'r';
                 board[0][0] = null;
                 document.getElementById(48).innerHTML = document.getElementById(18).innerHTML;
@@ -732,7 +732,6 @@ export class Board {
         if(promotion){startcell = promotion}
         board[rc_to[0]][rc_to[1]] = startcell;
         board[rc_from[0]][rc_from[1]] = null;
-        //this.update_pos(from % 10, to % 10)
         this.white_piece_poss = this.get_white_pieces(board);
         this.black_piece_poss = this.get_black_pieces(board);
         this.white_threats = this.all_white_valid_moves(board);

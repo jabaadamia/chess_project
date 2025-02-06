@@ -160,13 +160,13 @@ function visualise_valid_squares(valid_moves, remove){
             const circle = square.querySelector('.circle');
             if (circle) {
                 square.removeChild(circle);
-            }
+            }else{square.style.backgroundColor = ''}
         }else{
             if (square.children.length === 0) {
                 const circle = document.createElement('div');
                 circle.className = 'circle';
                 square.appendChild(circle);
-            }
+            }else{square.style.backgroundColor = '#f5a142';}
         }
     });
 }
@@ -264,8 +264,7 @@ async function submitMove(move) {
             if (data.complete) {
                 message.innerText = '✓  Puzzle solved! '+' Rating change: ' + data.rating_change;
                 if (data.next_puzzle_id) {
-                //     // Load next puzzle or redirect
-                    console.log(data)
+                //Load next puzzle or redirect
                     await sleep(500);
                     window.location.href = `/puzzles/${tag}/${data.next_puzzle_id}`;
                 }
@@ -346,10 +345,9 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_s
         }
 
         // for choosing which piece to promote and making move
-        if (promotion){
-            document.getElementById(start_square_id).innerHTML = '';
-
+        if (promotion){            
             if(forpgnnav){
+                document.getElementById(start_square_id).innerHTML = '';
                 document.getElementById(square_id).innerHTML = icons.get(forpgnnav);
                 b.make_move(parseInt(start_square_id), parseInt(square_id), b.board, b.move, forpgnnav);
                 add_drag(b.move);
@@ -357,10 +355,12 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_s
             }
 
             document.getElementById('promotion-bar').onclick = function(e){
+                e.stopPropagation();
                 document.getElementById(square_id).innerHTML = '';
                 document.getElementById('promotion-bar').style.visibility = 'hidden';
                 let move;
                 if (e.target.tagName == 'IMG'){
+                    document.getElementById(start_square_id).innerHTML = '';
                     document.getElementById(square_id).appendChild(e.target);
                     move = b.to_readable(square_id)+'='+e.target.className.toUpperCase();
                 }
@@ -396,6 +396,14 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_s
                         from_tos.push([parseInt(start_square_id), square_id, move[3]]); 
                     }else{
                         let fullmovediv = document.getElementById('move'+(b.full_moves-1));
+                        if(!fullmovediv){
+                            fullmovediv = document.createElement('div');
+                            fullmovediv.id = 'move'+b.full_moves;
+                            const movenum = document.createElement('p');
+                            movenum.innerText = b.full_moves+'.';
+                            fullmovediv.appendChild(movenum);
+                            pgn.appendChild(fullmovediv);
+                        }
                         m.style.left = '180px';
                         fullmovediv.appendChild(m);
                         from_tos.push([parseInt(start_square_id), square_id, move[3].toLowerCase()]);
@@ -409,6 +417,16 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_s
                 movesound.play();
                 add_drag(b.move);
             }
+            const hide = function (e) {
+                const bar = document.getElementById('promotion-bar');
+                if (bar.style.visibility !== 'hidden' && !bar.contains(e.target)) {
+                    bar.style.visibility = 'hidden';
+                }
+            };
+            setTimeout(() => {
+                document.getElementById('wrapper').addEventListener('mousedown', hide);
+            }, 100);
+            
         }else{ // moves other than promotion
             document.getElementById(square_id).innerHTML = document.getElementById(start_square_id).innerHTML;
             document.getElementById(start_square_id).innerHTML = '';
