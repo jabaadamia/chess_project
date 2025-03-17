@@ -111,6 +111,8 @@
     overflow-y: auto;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow-x: hidden;
+    word-break: break-word;
 }
 
 /* Style for each div inside the PGN area */

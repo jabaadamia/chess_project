@@ -21,7 +21,7 @@
         <h2>Saved Games</h2>
         {% for game in saved_games %}
             <a href="{% url 'analyze_game' game.id %}"><div>
-                <p>title </p>
+                <p>{{ game.title }} </p>
                 <p>{{ game.result }}</p>
                 <p>{{ game.updated_at|date:"Y-m-d" }}</p>
             

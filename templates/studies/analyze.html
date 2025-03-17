@@ -38,29 +38,61 @@
 
         function saveGame() {
             console.log("Save button clicked!");
+
+            const modalOverlay = document.createElement("div");
+
+            // Create a modal form for user input
+            const formHtml = `
+                <div id="saveGameModal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.2);">
+                    <h3>Save Game</h3>
+                    <label for="gameTitle">Title:</label>
+                    <input type="text" id="gameTitle" required><br><br>
+                    <label for="gameResult">Result:</label>
+                    <select id="gameResult">
+                        <option value="1-0">1-0</option>
+                        <option value="0-1">0-1</option>
+                        <option value="1/2-1/2">1/2-1/2</option>
+                    </select><br><br>
+                    <button onclick="confirmSaveGame()">Save</button>
+                    <button onclick="document.getElementById('saveGameModal').remove()">Cancel</button>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML("beforeend", formHtml);
+        }
+
+        function confirmSaveGame() {
+            let title = document.getElementById("gameTitle").value;
+            const result = document.getElementById("gameResult").value;
+        
+            if (!title) {
+                title = 'untitled'
+            }
+        
             fetch(window.location.href, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': csrftoken,
                 },
-                body: JSON.stringify({ save_game: true }),
+                body: JSON.stringify({ save_game: true, title: title, result: result }),
             })
-                .then(response => {
-                    if (response.redirected) {
-                        window.location.href = response.url;  // Redirect to login or any other page
-                    } else {
-                        return response.json();
-                    }
-                })
-                .then(data => {
-                    if (data.message) {
-                        alert(data.message);
-                    } else {
-                        console.error(data.error);
-                    }
-                })
-                .catch(error => console.error('Error:', error));    
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url; // Redirect to login if needed
+                } else {
+                    return response.json();
+                }
+            })
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                    document.getElementById("saveGameModal").remove();  // Close the form
+                } else {
+                    console.error(data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
         }
 
     </script>

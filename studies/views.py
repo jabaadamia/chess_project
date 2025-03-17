@@ -81,11 +81,20 @@ class AnalyzeBoard(TemplateView):
                     # Redirect the user to the login page (OAuth login flow)
                     return redirect(reverse('account_login') + f'?next={request.path}')
                 
-                # Save the game to the database
+                # Get the title and result from the request
+                title = data.get('title', 'untitled').strip()
+                result = data.get('result', '*')
+
+
+                if result not in ["1-0", "0-1", "1/2-1/2"]:
+                    return JsonResponse({"error": "Invalid result format"}, status=400)
+
+                # Save the game with the provided title and result
                 Game.objects.create(
                     user=request.user,
                     pgn=game_pgn,
-                    result='*',  # Set this based on the game outcome
+                    result=result,
+                    title=title,
                 )
                 return JsonResponse({"message": "Game saved successfully"})
             
