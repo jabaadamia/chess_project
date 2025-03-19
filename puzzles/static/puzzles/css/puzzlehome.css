@@ -47,14 +47,15 @@ h3{
     font-size: 12px;
 }
 
-/* Hover effect */
 .tag:hover {
-    background-color: #575757; /* Darker green background on hover */
+    background-color: #575757;
 }
 
-#test-container form{
+
+#test-container form {
     width: 20rem;
     height: 70vh;
+    margin: 10px;
     background-color: #1F1F1F;
     display: flex;
     flex-direction: column;
@@ -62,23 +63,46 @@ h3{
     align-items: center;
 }
 
-#test-container p{
+#test-container p {
     color: #ffffff;
 }
 
-#test-button{
-    padding: 5px 15px; 
-    background-color: #58966a; 
+#test-container input,
+#test-container select,
+#test-container textarea {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    color: #ffffff;
+    padding: 8px 12px;
+    border-radius: 4px;
+    width: 100%;
+}
+
+#test-container input:focus,
+#test-container select:focus,
+#test-container textarea:focus {
+    outline: none;
+    border-color: #58966a;
+}
+
+.title h3 {
+    color: #ffffff;
+    margin-bottom: 1rem;
+}
+
+#test-button {
+    padding: 5px 15px;
+    background-color: #58966a;
     color: white;
-    text-decoration: none; 
+    text-decoration: none;
     font-size: 1.2rem;
     border: 2px solid transparent;
     border-radius: 4px;
-    transition: background-color 0.3s, color 0.3s, border-color 0.3s; /* Smooth transition */
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
     margin-top: 1rem;
+    cursor: pointer;
 }
 
-/* Hover effect */
 #test-button:hover {
-    background-color: #92c399; /* Darker green background on hover */
+    background-color: #92c399;
 }

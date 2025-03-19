@@ -53,10 +53,11 @@ body {
         top: 50px;
         right: 0;
         width: 250px;
-        height: 80vh;
-        background-color: #313131;
+        height: 100vh;
+        background-color:#313131;
         flex-direction: column;
         align-items: center;
+        justify-content: flex-start;
         padding-top: 20px;
         
         /* Hidden state */
