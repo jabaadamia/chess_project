@@ -10,36 +10,26 @@
 
 {% block content %}
 
-<!-- <nav>
-    <div id="navbar">
-        <a href="" class="barlink" id="logo">logo</a>
-        <a href="" class="barlink">analyze</a>
-        <a href="" class="barlink">study</a>
-        <a href="" class="barlink">about</a>
-    
-        <div id="login">
-            {% if user.is_authenticated %}
-                <a href="{% url 'profile' username=user.username %}" class="barlink"> {{ user.username }}</a>
-                
-                <a href="{% url 'account_logout' %}" class="button">Log Out</a>
-            {% else %}
-                <a href="{% url 'account_login' %}" class="button">Log In</a>
-                <a href="{% url 'account_signup' %}" class="button">Sign Up</a>
-            {% endif %}
-        </div>
-    </div>
-</nav> -->
-
-<div id="content">
-    <div id="play">
+<content id="content">
+    <div id="play" class="board">
         <a href="">play</a>
         <img src="{% static 'images/board.png' %}" alt="">
     </div>
-    <div id="puzzles">
+    <div id="puzzles" class="board">
         <a href="{% url 'puzzle_home' %}">puzzles</a>
         <img src="{% static 'images/board.png' %}" alt="">
     </div>
-</div>
+    <div id="leaderboard" class="board">
+        <h3>Leaderboard</h3>
+        <div class="list">
+            {% for item in top10 %}
+                <div class="item">{{ forloop.counter }}. {{ item.puzzle_rating }} - {{ item }}</div>
+            {% empty %}
+                <p>No data available.</p>
+            {% endfor %}
+        </div>
+    </div>
+</content>
 
 
 {% endblock content %}
