@@ -113,8 +113,7 @@ function add_drag(move){
             document.querySelectorAll('.'+piece).forEach(p => {
                 p.style = 'pointer-events: all; z-index: 3;';
                 p.onmousedown = dragMouseDown;
-                p.ontouchstart = null;
-                p.addEventListener('touchstart', dragMouseDown, { passive: false });
+                p.addEventListener('touchstart', dragMouseDown, { passive: false });  // Non-passive touch event
             });
         });
         ['p','r','n','b','q','k']
@@ -122,7 +121,6 @@ function add_drag(move){
             document.querySelectorAll('.'+piece).forEach(p => {
                 p.style = 'pointer-events: none; z-index: 2;';
                 p.onmousedown = null;
-                p.removeEventListener('touchstart', dragMouseDown);
                 p.ontouchstart = null;
             });
         });
@@ -132,8 +130,7 @@ function add_drag(move){
             document.querySelectorAll('.'+piece).forEach(p => {
                 p.style = 'pointer-events: all; z-index: 2;';
                 p.onmousedown = dragMouseDown;
-                p.ontouchstart = null;
-                p.addEventListener('touchstart', dragMouseDown, { passive: false });
+                p.addEventListener('touchstart', dragMouseDown, { passive: false });  // Non-passive touch event
             });
         });
         ['P','R','N','B','Q','K']
@@ -141,7 +138,6 @@ function add_drag(move){
             document.querySelectorAll('.'+piece).forEach(p => {
                 p.style = 'pointer-events: none; z-index: 1;';
                 p.onmousedown = null;
-                p.removeEventListener('touchstart', dragMouseDown);
                 p.ontouchstart = null;
             });
         });
@@ -197,28 +193,28 @@ function dragMouseDown(e) {
 
     dragging_piece = this;
     dragging_piece.style.position = 'absolute';
-    e = e || window.event;
-    e.preventDefault();
-    // get the mouse cursor position at startup:
+    
     if (e.type === 'touchstart') {
+        e.preventDefault(); // Prevent scrolling while dragging
         pos3 = e.touches[0].clientX;
         pos4 = e.touches[0].clientY;
+        document.addEventListener('touchend', closeDragElement, { passive: false });
+        document.addEventListener('touchmove', elementDrag, { passive: false });
     } else {
+        e = e || window.event;
+        e.preventDefault();
         pos3 = e.clientX;
         pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
     }
-    
-    document.addEventListener('touchend', closeDragElement, { passive: false });
-    document.addEventListener('touchmove', elementDrag, { passive: false });
-    document.onmouseup = closeDragElement;
-    document.onmousemove = elementDrag;
 }
 
 //when grabbing piece is moveing
 function elementDrag(e) {
     e = e || window.event;
     e.preventDefault();
-    // calculate the new cursor position:
+
     if (e.type === 'touchmove') {
         pos1 = pos3 - e.touches[0].clientX;
         pos2 = pos4 - e.touches[0].clientY;
@@ -230,7 +226,7 @@ function elementDrag(e) {
         pos3 = e.clientX;
         pos4 = e.clientY;
     }
-    // set the element's new position:
+
     top = dragging_piece.offsetTop - pos2;
     left = dragging_piece.offsetLeft - pos1;
 
@@ -239,11 +235,12 @@ function elementDrag(e) {
 }
 
     // when piece is placed
-function closeDragElement() {
-    // stop moving when mouse button is released:
+function closeDragElement(e) {
     document.onmouseup = null;
     document.onmousemove = null;
+    document.ontouchend = null;
     document.ontouchmove = null;
+
     const square_id = get_square_id(parseInt(top), parseInt(left));
 
     dragging_piece.style.position = 'relative';
