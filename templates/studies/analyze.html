@@ -37,13 +37,25 @@
         const csrftoken = '{{ csrf_token }}';
 
         function saveGame() {
-            console.log("Save button clicked!");
+            // Check if modal already exists
+            if (document.getElementById('saveGameModal')) {
+                return; // Exit if modal already exists
+            }
 
-            const modalOverlay = document.createElement("div");
+            // Create modal overlay for handling outside clicks
+            const modalOverlay = document.createElement('div');
+            modalOverlay.id = 'modalOverlay';
+            modalOverlay.style.position = 'fixed';
+            modalOverlay.style.top = '0';
+            modalOverlay.style.left = '0';
+            modalOverlay.style.width = '100%';
+            modalOverlay.style.height = '100%';
+            modalOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+            modalOverlay.style.zIndex = '999';
 
-            // Create a modal form for user input
+            // Create the modal form
             const formHtml = `
-                <div id="saveGameModal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.2);">
+                <div id="saveGameModal">
                     <h3>Save Game</h3>
                     <label for="gameTitle">Title:</label>
                     <input type="text" id="gameTitle" required><br><br>
@@ -54,11 +66,34 @@
                         <option value="1/2-1/2">1/2-1/2</option>
                     </select><br><br>
                     <button onclick="confirmSaveGame()">Save</button>
-                    <button onclick="document.getElementById('saveGameModal').remove()">Cancel</button>
+                    <button onclick="closeModal()">Cancel</button>
                 </div>
             `;
             
-            document.body.insertAdjacentHTML("beforeend", formHtml);
+            // Add modal overlay first
+            document.body.appendChild(modalOverlay);
+            
+            // Add modal content
+            modalOverlay.insertAdjacentHTML('beforeend', formHtml);
+
+            // Add click event listener to overlay
+            modalOverlay.addEventListener('click', function(event) {
+                if (event.target === modalOverlay) {
+                    closeModal();
+                }
+            });
+
+            // Prevent clicks inside modal from closing it
+            document.getElementById('saveGameModal').addEventListener('click', function(event) {
+                event.stopPropagation();
+            });
+        }
+
+        function closeModal() {
+            const modalOverlay = document.getElementById('modalOverlay');
+            if (modalOverlay) {
+                modalOverlay.remove();
+            }
         }
 
         function confirmSaveGame() {
@@ -79,7 +114,7 @@
             })
             .then(response => {
                 if (response.redirected) {
-                    window.location.href = response.url; // Redirect to login if needed
+                    window.location.href = response.url;
                 } else {
                     return response.json();
                 }
@@ -87,7 +122,7 @@
             .then(data => {
                 if (data.message) {
                     alert(data.message);
-                    document.getElementById("saveGameModal").remove();  // Close the form
+                    closeModal();
                 } else {
                     console.error(data.error);
                 }

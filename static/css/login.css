@@ -1,67 +1,99 @@
-#container{
-    display: inline-block;
-    position: relative;
-    left: 50%;
-    transform: translateX(-50%);
-    padding-top: 4rem;
+.login-container {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-h2{
-    display: inline-block;
-    position: relative;
-    left: 50%;
-    transform: translateX(-50%);
-    padding-bottom: 2rem;
-    color: white;
-}
-
-form{
-    width: 25rem;
-    height: 60vh;
+.login-card {
     background-color: #1F1F1F;
+    padding: 2.5rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-card h1 {
+    color: white;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-size: 1.8rem;
+}
+
+form {
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
-    align-items: center;
+    gap: 1.5rem;
 }
 
-form p{
+form p {
+    margin: 0;
     color: #ffffff;
-    font-size: large;
 }
 
-form p input{
-    width: 8rem;
-    height: 1.5rem;
-    font-size: medium;
-}
-
-#id_password_helptext a{
+form p label {
     display: block;
-    padding-top: 1rem;
-    padding-left: 1.5rem;
-    color: white;
+    margin-bottom: 0.5rem;
+    color: #888;
+    font-size: 0.9rem;
 }
 
-#submit-button{
-    padding: 5px 15px; 
-    background-color: #58966a; 
-    color: white;
-    text-decoration: none; 
-    font-size: 1.2rem;
-    border: 2px solid transparent;
+form p input {
+    width: 100%;
+    padding: 0.8rem;
+    background-color: #2a2a2a;
+    border: 1px solid #3a3a3a;
     border-radius: 4px;
-    transition: background-color 0.3s, color 0.3s, border-color 0.3s; /* Smooth transition */
+    color: white;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+form p input:focus {
+    outline: none;
+    border-color: rgb(57, 152, 97);
+}
+
+.login-button {
+    background-color: rgb(57, 152, 97);
+    color: white;
+    border: none;
+    padding: 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: opacity 0.2s;
+    width: 100%;
     margin-top: 1rem;
 }
 
-/* Hover effect */
-#submit-button:hover {
-    background-color: #92c399; /* Darker green background on hover */
+.login-button:hover {
+    opacity: 0.9;
 }
 
-ul{
-    padding-left: 2rem;
-    color: white;
-    font-size: smaller;
+/* Help text styling */
+.helptext {
+    display: block;
+    color: #888;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+}
+
+.helptext a {
+    color: rgb(57, 152, 97);
+    text-decoration: none;
+}
+
+.helptext a:hover {
+    text-decoration: underline;
+}
+
+/* Error messages */
+.errorlist {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    color: #e74c3c;
+    font-size: 0.9rem;
 }

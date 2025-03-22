@@ -2,7 +2,7 @@
 .hero-section {
     text-align: center;
     padding: 4rem 2rem;
-    background: linear-gradient(180deg, #313131 0%, #1a1a1a 100%);
+    background: linear-gradient(180deg, #1a1a1a 0%, #313131 100%);
     margin-bottom: 3rem;
     border-radius: 0 0 50px 50px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -208,7 +208,7 @@ footer {
 }
 
 .footer-section a:hover {
-    color: #4a90e2;
+    color: rgb(57, 152, 97);
 }
 
 .social-links {

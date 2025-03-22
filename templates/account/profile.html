@@ -7,27 +7,51 @@
 {% endblock %}
 
 {% block content %}
-
-<div id="container">
-    <div id="user-data">
-        <p>{{ user.username }}</p>
-        <p>{{ user.email }}</p>
-        <p>rating: {{ user.rating }}</p>
-        <p>puzzle rating: {{ user.puzzle_rating }}</p>
-        <p>puzzles solved: {{ user.solved_puzzles.count }}</p>
+<div class="profile-container">
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <span>{{ user.username|first|upper }}</span>
+            </div>
+            <h1 class="profile-username">{{ user.username }}</h1>
+            <p class="profile-email">{{ user.email }}</p>
+        </div>
+        
+        <div class="profile-stats">
+            <div class="stat-item">
+                <span class="stat-label">Rating</span>
+                <span class="stat-value">{{ user.rating }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Puzzle Rating</span>
+                <span class="stat-value">{{ user.puzzle_rating }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Puzzles Solved</span>
+                <span class="stat-value">{{ user.solved_puzzles.count }}</span>
+            </div>
+        </div>
     </div>
 
-    <div id="games">
-        <h2>Saved Games</h2>
-        {% for game in saved_games %}
-            <a href="{% url 'analyze_game' game.id %}"><div>
-                <p>{{ game.title }} </p>
-                <p>{{ game.result }}</p>
-                <p>{{ game.updated_at|date:"Y-m-d" }}</p>
-            
-            </div></a>
-        {% endfor %}
+    <div class="games-section">
+        <h2>Game History</h2>
+        <div class="games-list">
+            {% for game in saved_games %}
+                <a href="{% url 'analyze_game' game.id %}" class="game-card">
+                    <div class="game-info">
+                        <h3 class="game-title">{{ game.title }}</h3>
+                        <span class="game-result">{{ game.result }}</span>
+                    </div>
+                    <div class="game-meta">
+                        <span class="game-date">{{ game.updated_at|date:"M d, Y" }}</span>
+                    </div>
+                </a>
+            {% empty %}
+                <div class="no-games">
+                    <p>No saved games yet</p>
+                </div>
+            {% endfor %}
+        </div>
     </div>
 </div>
-
 {% endblock %}

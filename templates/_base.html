@@ -3,6 +3,7 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Chess{% endblock title %}</title>
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com"> 
@@ -12,11 +13,11 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-
     <nav>
         <div id="navbar">
             <a href="{% url 'home' %}" class="barlink"><img src="{% static 'images/chesslogo.svg' %}" alt="logo" id="logo"></a>
-            <div id="menu" class="menu">
+            
+            <div id="menu">
                 <a href="{% url 'analyze' %}" class="barlink">analyze</a>
                 <a href="" class="barlink">study</a>
                 <a href="{% url 'about' %}" class="barlink">about</a>
@@ -24,13 +25,14 @@
             
             <div id="login">
                 {% if user.is_authenticated %}
-                    <a href="{% url 'profile' username=user.username %}" class="barlink"> {{ user.username }}</a>
+                    <a href="{% url 'profile' username=user.username %}" class="barlink">{{ user.username }}</a>
                     <a href="{% url 'account_logout' %}" class="button">Log Out</a>
                 {% else %}
                     <a href="{% url 'account_login' %}" class="button">Log In</a>
                     <a href="{% url 'account_signup' %}" class="button">Sign Up</a>
                 {% endif %}
             </div>
+
             <div id="hamburger" class="hamburger">
                 <span></span>
                 <span></span>
@@ -39,16 +41,29 @@
         </div>
     </nav>
     
-    
     {% block content %}
     {% endblock content %}
-    
 
 <script>
-document.getElementById('hamburger').addEventListener('click', function () {
-    // Toggle the 'active' class on the navbar and menu for animation
-    document.getElementById('navbar').classList.toggle('active');
-    document.getElementById('menu').classList.toggle('active');
+document.addEventListener('DOMContentLoaded', function() {
+    const hamburger = document.getElementById('hamburger');
+    const navbar = document.getElementById('navbar');
+    const menu = document.getElementById('menu');
+    
+    hamburger.addEventListener('click', function() {
+        navbar.classList.toggle('active');
+        menu.classList.toggle('active');
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', function(event) {
+        const isClickInside = navbar.contains(event.target);
+        
+        if (!isClickInside && menu.classList.contains('active')) {
+            navbar.classList.remove('active');
+            menu.classList.remove('active');
+        }
+    });
 });
 </script>
 

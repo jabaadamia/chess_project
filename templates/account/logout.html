@@ -1,15 +1,22 @@
 {% extends '_base.html' %}
 
+{% load static %}
+
 {% block title %}Log Out{% endblock %}
 
-{% block content %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/logout.css' %}">
+{% endblock %}
 
-<div class="container">
-    <h1>Log Out</h1>
-    <p>Are you sure you want to log out?</p>
-    <form method="post" action="{% url 'account_logout' %}">
-        {% csrf_token %}
-        <button type="submit">Log Out</button>
-    </form>
+{% block content %}
+<div class="logout-container">
+    <div class="logout-card">
+        <h1>Log Out</h1>
+        <p>Are you sure you want to log out?</p>
+        <form method="post" action="{% url 'account_logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="logout-button">Log Out</button>
+        </form>
+    </div>
 </div>
 {% endblock content %}
