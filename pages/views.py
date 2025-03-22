@@ -9,3 +9,6 @@ class HomePageView(TemplateView):
         context = super().get_context_data(**kwargs)
         context["top10"] = CustomUser.objects.order_by("-puzzle_rating")[:10]
         return context
+
+class AboutPageView(TemplateView):
+    template_name = 'about.html'

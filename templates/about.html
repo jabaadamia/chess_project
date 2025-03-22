@@ -1,0 +1,28 @@
+{% extends '_base.html' %}
+
+{% load static %}
+
+{% block title %}About{% endblock title %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'pages/css/about.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="about-container">
+    <h1>About BlunderFix</h1>
+    <div class="about-content">
+        <p>BlunderFix is a platform dedicated to helping chess players improve their game through tactical puzzles and community engagement.</p>
+        
+        <h2>Our Mission</h2>
+        <p>Our mission is to make chess training accessible, engaging, and effective for players of all skill levels.</p>
+        
+        <h2>What We Offer</h2>
+        <ul>
+            <li>Daily chess puzzles to sharpen your tactical skills</li>
+            <li>Progress tracking to monitor your improvement</li>
+            <li>A supportive community of chess enthusiasts</li>
+        </ul>
+    </div>
+</div>
+{% endblock content %} 
