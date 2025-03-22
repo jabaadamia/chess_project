@@ -1,27 +1,14 @@
 # Chess Training Platform
 
 ## Description
-Platform designed for chess enthusiasts to improve their skills. This platform provides a comprehensive set of tools, including user authentication, puzzle-solving progress tracking, user rating management, and game analysis with saving functionality. 
-
-
----
-
-## Features
-- **User Authentication**: Secure login and registration system.
-- **Puzzle Progress Tracking**: Track solved puzzles and improve tactical skills.
-- **User Rating Tracking**: Measure and compare performance using a rating system.
-- **Game Analysis**: Analyze games with move-by-move interaction.
-- **Game Saving**: Save and review games for future study.
+A web-based platform built for chess enthusiasts to sharpen their skills. It offers themed puzzles with varying difficulty levels, progress tracking, user ratings, and interactive gameplay with move-by-move analysis and saving capabilities.
 
 ---
 
-## Tech Stack
-- **Backend**:  
+## Stack
   - PostgreSQL
-  - Django
-  
-- **Frontend**:  
-  - **JavaScript**: Implements chess game logic and interactive UI elements without relying on external libraries.
+  - Django 
+  - Vanilla JavaScript for chess logic and interactive UI, with no external libraries. 
 
 
 ## Demo
