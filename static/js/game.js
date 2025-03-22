@@ -184,6 +184,8 @@ function add_drag(move){
             document.querySelectorAll('.'+piece).forEach(p => {
                 p.style = 'pointer-events: all; z-index: 3;';
                 p.onmousedown = dragMouseDown;
+                p.ontouchstart = null;
+                p.addEventListener('touchstart', dragMouseDown, { passive: false });
             });
         });
         ['p','r','n','b','q','k']
@@ -191,6 +193,8 @@ function add_drag(move){
             document.querySelectorAll('.'+piece).forEach(p => {
                 p.style = 'pointer-events: none; z-index: 2;';
                 p.onmousedown = null;
+                p.removeEventListener('touchstart', dragMouseDown);
+                p.ontouchstart = null;
             });
         });
     }else{  // add drag events to black pieces
@@ -199,6 +203,8 @@ function add_drag(move){
             document.querySelectorAll('.'+piece).forEach(p => {
                 p.style = 'pointer-events: all; z-index: 2;';
                 p.onmousedown = dragMouseDown;
+                p.ontouchstart = null;
+                p.addEventListener('touchstart', dragMouseDown, { passive: false });
             });
         });
         ['P','R','N','B','Q','K']
@@ -206,6 +212,8 @@ function add_drag(move){
             document.querySelectorAll('.'+piece).forEach(p => {
                 p.style = 'pointer-events: none; z-index: 1;';
                 p.onmousedown = null;
+                p.removeEventListener('touchstart', dragMouseDown);
+                p.ontouchstart = null;
             });
         });
     }
@@ -266,10 +274,19 @@ function dragMouseDown(e) {
     e = e || window.event;
     e.preventDefault();
     // get the mouse cursor position at startup:
-    pos3 = e.clientX;
-    pos4 = e.clientY;
+    if (e.type === 'touchstart') {
+        pos3 = e.touches[0].clientX;
+        pos4 = e.touches[0].clientY;
+    } else {
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+    }
+    
+    // Use addEventListener for touch events
+    document.addEventListener('touchend', closeDragElement, { passive: false });
+    document.addEventListener('touchmove', elementDrag, { passive: false });
+    // Keep the mouse events as they were
     document.onmouseup = closeDragElement;
-    // call a function whenever the cursor moves:
     document.onmousemove = elementDrag;
 }
 
@@ -278,10 +295,17 @@ function elementDrag(e) {
     e = e || window.event;
     e.preventDefault();
     // calculate the new cursor position:
-    pos1 = pos3 - e.clientX;
-    pos2 = pos4 - e.clientY;
-    pos3 = e.clientX;
-    pos4 = e.clientY;
+    if (e.type === 'touchmove') {
+        pos1 = pos3 - e.touches[0].clientX;
+        pos2 = pos4 - e.touches[0].clientY;
+        pos3 = e.touches[0].clientX;
+        pos4 = e.touches[0].clientY;
+    } else {
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+    }
     // set the element's new position:
     top = dragging_piece.offsetTop - pos2;
     left = dragging_piece.offsetLeft - pos1;
@@ -293,9 +317,10 @@ function elementDrag(e) {
     // when piece is placed
 function closeDragElement() {
     // stop moving when mouse button is released:
-
     document.onmouseup = null;
+    document.ontouchend = null;
     document.onmousemove = null;
+    document.ontouchmove = null;
     const square_id = get_square_id(parseInt(top), parseInt(left));
 
     dragging_piece.style.position = 'relative';
