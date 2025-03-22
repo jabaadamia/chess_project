@@ -6,30 +6,89 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'pages/css/home.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 {% endblock %}
 
 {% block content %}
 
+<div class="hero-section">
+    <h1>Welcome to BlunderFix</h1>
+    <p>Challenge yourself, improve your game, and become a master</p>
+</div>
+
 <content id="content">
-    <div id="play" class="board">
-        <a href="">play</a>
-        <img src="{% static 'images/board.png' %}" alt="">
-    </div>
     <div id="puzzles" class="board">
-        <a href="{% url 'puzzle_home' %}">puzzles</a>
-        <img src="{% static 'images/board.png' %}" alt="">
+        <a href="{% url 'puzzle_home' %}" class="card-link">
+            <div class="card-header">
+                <i class="fas fa-puzzle-piece"></i>
+                <span>Chess Puzzles</span>
+            </div>
+            <img src="{% static 'images/board.png' %}" alt="">
+            <div class="card-footer">
+                <p>Start Solving</p>
+            </div>
+        </a>
     </div>
     <div id="leaderboard" class="board">
-        <h3>Leaderboard</h3>
+        <div class="card-header">
+            <i class="fas fa-trophy"></i>
+            <h3>Leaderboard</h3>
+        </div>
         <div class="list">
             {% for item in top10 %}
-                <div class="item">{{ forloop.counter }}. {{ item.puzzle_rating }} - {{ item }}</div>
+                <div class="item">
+                    <span class="rank">{{ forloop.counter }}</span>
+                    <span class="rating">{{ item.puzzle_rating }}</span>
+                    <span class="player">{{ item }}</span>
+                </div>
             {% empty %}
                 <p>No data available.</p>
             {% endfor %}
         </div>
+        <div class="card-footer">
+            
+        </div>
     </div>
 </content>
 
+<div class="features-section">
+    <div class="feature">
+        <i class="fas fa-chess"></i>
+        <h3>Daily Puzzles</h3>
+        <p>New challenges every day</p>
+    </div>
+    <div class="feature">
+        <i class="fas fa-chart-line"></i>
+        <h3>Track Progress</h3>
+        <p>Monitor your improvement</p>
+    </div>
+    <div class="feature">
+        <i class="fas fa-users"></i>
+        <h3>Community</h3>
+        <p>Join fellow chess enthusiasts</p>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-content">
+        <div class="footer-sections">
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <a href="#">About Us</a>
+                <a href="#">Contact</a>
+            </div>
+            <div class="footer-section">
+                <h4>Connect</h4>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-discord"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Chess Platform. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
 
 {% endblock content %}
