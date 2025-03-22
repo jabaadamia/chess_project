@@ -184,7 +184,7 @@ function add_drag(move){
             document.querySelectorAll('.'+piece).forEach(p => {
                 p.style = 'pointer-events: all; z-index: 3;';
                 p.onmousedown = dragMouseDown;
-                p.addEventListener('touchstart', dragMouseDown, { passive: false });  // Non-passive touch event
+                p.ontouchstart = dragMouseDown;  // Add touch event
             });
         });
         ['p','r','n','b','q','k']
@@ -192,7 +192,7 @@ function add_drag(move){
             document.querySelectorAll('.'+piece).forEach(p => {
                 p.style = 'pointer-events: none; z-index: 2;';
                 p.onmousedown = null;
-                p.ontouchstart = null;
+                p.ontouchstart = null;  // Remove touch event
             });
         });
     }else{  // add drag events to black pieces
@@ -201,7 +201,7 @@ function add_drag(move){
             document.querySelectorAll('.'+piece).forEach(p => {
                 p.style = 'pointer-events: all; z-index: 2;';
                 p.onmousedown = dragMouseDown;
-                p.addEventListener('touchstart', dragMouseDown, { passive: false });  // Non-passive touch event
+                p.ontouchstart = dragMouseDown;  // Add touch event
             });
         });
         ['P','R','N','B','Q','K']
@@ -209,7 +209,7 @@ function add_drag(move){
             document.querySelectorAll('.'+piece).forEach(p => {
                 p.style = 'pointer-events: none; z-index: 1;';
                 p.onmousedown = null;
-                p.ontouchstart = null;
+                p.ontouchstart = null;  // Remove touch event
             });
         });
     }
@@ -272,8 +272,8 @@ function dragMouseDown(e) {
         e.preventDefault(); // Prevent scrolling while dragging
         pos3 = e.touches[0].clientX;
         pos4 = e.touches[0].clientY;
-        document.addEventListener('touchend', closeDragElement, { passive: false });
-        document.addEventListener('touchmove', elementDrag, { passive: false });
+        document.ontouchend = closeDragElement;
+        document.ontouchmove = elementDrag;
     } else {
         e = e || window.event;
         e.preventDefault();
