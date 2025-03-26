@@ -260,7 +260,7 @@ function dragMouseDown(e) {
     // prevent adding new move branch
     if (cur_move !== from_tos.length){return}
 
-    valid_moves = b.valid_moves_of(parseInt(this.parentNode.id), false, b.board, b.move, this.className.toLowerCase());
+    valid_moves = b.valid_moves_of(parseInt(this.parentNode.id), false, b.board, b.move, this.classList[0].toLowerCase());
     start_square_id = this.parentNode.id;
 
     visualise_valid_squares(valid_moves, false);
@@ -373,7 +373,7 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_s
     // if piece is placed on the valid square
     if (valid_moves.includes(square_id)){
         // if white pawn promoted
-        if (square_id % 10 == 8 && document.getElementById(start_square_id).childNodes[0].className === 'P'){
+        if (square_id % 10 == 8 && document.getElementById(start_square_id).childNodes[0].classList.contains('P')){
             promotion = true;
             if(!forpgnnav){
                 let bar = document.getElementById('promotion-bar')
@@ -390,7 +390,7 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_s
 
         }
         //if black pawn promoted
-        if (square_id % 10 == 1 && document.getElementById(start_square_id).childNodes[0].className === 'p'){
+        if (square_id % 10 == 1 && document.getElementById(start_square_id).childNodes[0].classList.contains('p')){
             promotion = true;
             if(!forpgnnav){
                 let bar = document.getElementById('promotion-bar')

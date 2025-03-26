@@ -22,7 +22,7 @@ export const icons = new Map([
     ['N', "<img class='N' src='/static/images/chessicons/whiteknight.png' alt='wn'></img>"],
     ['B', "<img class='B' src='/static/images/chessicons/whitebishop.png' alt='wb'></img>"],
     ['Q', "<img class='Q' src='/static/images/chessicons/whitequeen.png' alt='wq'></img>"],
-    ['K', "<img class='K' src='/static/images/chessicons/whiteking.png' alt='bk'></img>"]
+    ['K', "<img class='K' src='/static/images/chessicons/whiteking.png' alt='wk'></img>"]
 ])
 
 
@@ -120,7 +120,7 @@ export class Board {
         });
     }
 
-    draw_board(board, rotate=false){
+    draw_board(board, rotate=false, blind=false){
         // reset board
         document.getElementById('wrapper').querySelectorAll('div').forEach(element => {
             element.innerHTML = null;
@@ -142,7 +142,11 @@ export class Board {
 
                 //cell_id = 10 * (c + 1) + r + 1;
                 if (letter != null){
-                    document.getElementById(cell_id).innerHTML = /*'<i class="fa">'+*/icons.get(letter)/*+'</i>'*/
+                    const cell = document.getElementById(cell_id);
+                    cell.innerHTML = icons.get(letter);
+                    if (blind){
+                        cell.firstElementChild.classList.add('blind'); 
+                    }
                 }
             }
         }

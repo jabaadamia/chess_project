@@ -155,3 +155,7 @@
     color: white; /* Change text color to white */
     transform: scale(1.1); /* Slightly scale up the element */
 }
+
+.blind {
+    opacity: 0;
+}
