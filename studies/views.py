@@ -8,6 +8,8 @@ from django.urls import reverse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http.response import JsonResponse
 from django.views.generic import DetailView, TemplateView
+from django.views.decorators.http import require_POST
+from django.utils.decorators import method_decorator
 
 from .models import Game
 
@@ -95,3 +97,14 @@ class AnalyzeBoard(TemplateView):
             return JsonResponse({"error": f"Invalid move: {str(e)}"}, status=400)
         except Exception as e:
             return JsonResponse({"error": f"Unexpected error: {str(e)}"}, status=500)
+
+@method_decorator(require_POST, name='dispatch')
+class DeleteGame(DetailView):
+    model = Game
+    
+    def post(self, request, *args, **kwargs):
+        game = self.get_object()
+        if game.user != request.user:
+            return JsonResponse({"error": "You are not authorized to delete this game"}, status=403)
+        game.delete()
+        return JsonResponse({"message": "Game deleted successfully"})

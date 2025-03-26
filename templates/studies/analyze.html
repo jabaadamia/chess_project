@@ -33,7 +33,7 @@
         let start_fen = '{{fen}}';
         let pgn_str = '{{ pgn|escapejs }}';
         let from_tos = JSON.parse('{{ from_to|escapejs }}');
-        let unsaved_pgn_string = '';
+        let unsaved_pgn_string = pgn_str;
   
         const csrftoken = '{{ csrf_token }}';
 
@@ -73,7 +73,7 @@
             
             // Add modal overlay first
             document.body.appendChild(modalOverlay);
-            
+
             // Add modal content
             modalOverlay.insertAdjacentHTML('beforeend', formHtml);
 

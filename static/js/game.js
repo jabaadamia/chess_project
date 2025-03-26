@@ -420,7 +420,8 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_s
                         m.style.left = '70px';
                         fullmovediv.appendChild(m);
                         pgn.appendChild(fullmovediv);
-                        from_tos.push([parseInt(start_square_id), square_id, move[3]]); 
+                        from_tos.push([parseInt(start_square_id), square_id, move[3]]);
+                        unsaved_pgn_string += b.full_moves+'. '; 
                     }else{
                         let fullmovediv = document.getElementById('move'+(b.full_moves-1));
                         if(!fullmovediv){
@@ -435,10 +436,9 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_s
                         fullmovediv.appendChild(m);
                         from_tos.push([parseInt(start_square_id), square_id, move[3].toLowerCase()]);
                     }
+                    unsaved_pgn_string += move + ' ';
+                    pgn_text_area.value = unsaved_pgn_string;
                     cur_move++;
-                    if (to_submit){
-                        submitMove(move_puzzle_format);
-                    }
                 }
                 
                 movesound.play();
@@ -468,7 +468,6 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_s
             
             if (!forpgnnav){
                 const m = document.createElement('p');
-                //m.style.position = 'absolute';
                 m.innerText = move;
                 m.id = 'm'+b.half_moves;
                 m.classList.add('pgn-move');

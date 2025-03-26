@@ -185,6 +185,9 @@ p {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    text-decoration: none;
+    color: inherit;
+    flex: 1;
 }
 
 .game-title {
@@ -201,6 +204,24 @@ p {
 .game-meta {
     color: rgb(57, 152, 97);
     font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.delete-game {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0 0.5rem;
+    transition: transform 0.2s ease;
+}
+
+.delete-game:hover {
+    transform: scale(1.2);
+    color: #c0392b;
 }
 
 .no-games {
