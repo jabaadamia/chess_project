@@ -9,7 +9,6 @@ const pgn_text_area = document.getElementById('pgn_textarea');
 const printButton = document.getElementById('printButton');
 //let message = document.getElementById('message');
 
-//let currentSolution = '';
 
 window.firstmove = firstmove;
 window.prevmove = prevmove;
@@ -332,40 +331,6 @@ function getIds(move) {
     return [from, to];
 }
 
-
-async function addMove(move) {
-    try {
-        // console.log("Current move:", cur_move,"New move:", move);
-        // console.log("pgn", from_tos)
-        
-        // Send a POST request to the Django view with the move data
-        const response = await fetch(window.location.href, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrftoken,
-            },
-            body: JSON.stringify({
-                cur_move: cur_move, // Include the current move
-                move: move,        // Include the new move
-                
-            }), 
-        });
-
-        // Check if the response was successful
-        if (response.ok) {
-            const data = await response.json();
-            pgn_text_area.value = data.pgn;
-            // console.log("Move processed successfully:");
-        } else {
-            // console.error("Error processing move:", response);
-        }
-    } catch (error) {
-        console.error("Error:", error);
-    }
-}
-
-
 function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_submit){
     let promotion = false;
     let move_puzzle_format = b.to_readable(start_square_id)+b.to_readable(square_id); // e.g e2e4
@@ -515,7 +480,8 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_s
                     fullmovediv.appendChild(movenum);
                     m.style.left = '70px';
                     fullmovediv.appendChild(m);
-                    pgn.appendChild(fullmovediv);  
+                    pgn.appendChild(fullmovediv);
+                    unsaved_pgn_string += b.full_moves+'. ';
                 }else{
                     try {
                         let fullmovediv = document.getElementById('move'+(b.full_moves-1));
@@ -533,7 +499,8 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_s
                 from_tos.push([parseInt(start_square_id), square_id]);
                 cur_move++;
                 
-                addMove(move_puzzle_format);
+                unsaved_pgn_string += move + ' ';
+                pgn_text_area.value = unsaved_pgn_string;
             }
 
             movesound.play();

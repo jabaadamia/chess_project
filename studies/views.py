@@ -62,16 +62,6 @@ class AnalyzeBoard(TemplateView):
         try:
             data = json.loads(request.body)
 
-            game_pgn = request.session.get('game_pgn')
-
-            if not game_pgn:
-                # If no game is found in session, start a new game
-                game = chess.pgn.Game()
-            else:
-                # Reconstruct the game from the stored PGN string in the session
-                game = chess.pgn.read_game(io.StringIO(game_pgn))
-                board = game.board()
-
             save_game_flag = data.get('save_game', False)
             fen = request.session.get('fen', chess.STARTING_FEN)
             board = chess.Board(fen)
@@ -84,7 +74,7 @@ class AnalyzeBoard(TemplateView):
                 # Get the title and result from the request
                 title = data.get('title', 'untitled').strip()
                 result = data.get('result', '*')
-
+                pgn = data.get('pgn', '')
 
                 if result not in ["1-0", "0-1", "1/2-1/2"]:
                     return JsonResponse({"error": "Invalid result format"}, status=400)
@@ -92,42 +82,12 @@ class AnalyzeBoard(TemplateView):
                 # Save the game with the provided title and result
                 Game.objects.create(
                     user=request.user,
-                    pgn=game_pgn,
+                    pgn=pgn,
                     result=result,
                     title=title,
                 )
                 return JsonResponse({"message": "Game saved successfully"})
             
-            # Parse the move from the request
-            move_uci = data.get('move')  # Get the move in UCI format
-            if not move_uci:
-                return JsonResponse({"error": "Move data is missing"}, status=400)
-
-            # Convert the UCI move string to a chess.Move object
-            move = chess.Move.from_uci(move_uci)
-
-            # Check if the move is legal
-            if board.is_legal(move):
-                board.push(move)  # Apply the move to the board
-                request.session['fen'] = board.fen()  # Update the board state in the session
-                
-                if not game.is_end():
-                    node = game.end()
-                else:
-                    node = game
-                node = node.add_main_variation(move)
-                
-                game_pgn = game.accept(chess.pgn.StringExporter(headers=None))
-                request.session['game_pgn'] = game_pgn
-
-                # Return the updated FEN and the legal moves from the current position
-                return JsonResponse({
-                    "pgn": game_pgn,
-                    "fen": board.fen(),
-                    "legal_moves": [move.uci() for move in board.legal_moves],  # List of legal moves
-                })
-            else:
-                return JsonResponse({"error": "Illegal move"}, status=400)
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON payload"}, status=400)

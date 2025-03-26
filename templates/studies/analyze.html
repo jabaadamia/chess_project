@@ -32,7 +32,8 @@
     <script>
         let start_fen = '{{fen}}';
         let pgn_str = '{{ pgn|escapejs }}';
-        let from_tos = JSON.parse('{{ from_to|escapejs }}');;
+        let from_tos = JSON.parse('{{ from_to|escapejs }}');
+        let unsaved_pgn_string = '';
   
         const csrftoken = '{{ csrf_token }}';
 
@@ -110,7 +111,7 @@
                     'Content-Type': 'application/json',
                     'X-CSRFToken': csrftoken,
                 },
-                body: JSON.stringify({ save_game: true, title: title, result: result }),
+                body: JSON.stringify({ save_game: true, title: title, result: result, pgn: unsaved_pgn_string }),
             })
             .then(response => {
                 if (response.redirected) {
