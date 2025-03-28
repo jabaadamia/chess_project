@@ -237,7 +237,7 @@ function visualise_valid_squares(valid_moves, remove){
             }else{square.style.backgroundColor = ''}
         }else{
             if (square.children.length === 0) {
-                const circle = document.createElement('div');
+                const circle = document.createElement('span');
                 circle.className = 'circle';
                 square.appendChild(circle);
             }else{square.style.backgroundColor = '#f5a142';}
@@ -246,8 +246,10 @@ function visualise_valid_squares(valid_moves, remove){
 }
 
 function get_square_id(top, left){
-    const row = Math.floor((top+20)/60);
-    const col = Math.floor((left+20)/60);
+    const board = document.getElementById('wrapper');
+    const squareSize = board.offsetWidth / 8;
+    const row = Math.floor((top + squareSize/2)/squareSize);
+    const col = Math.floor((left + squareSize/2)/squareSize);
     if (is_rotated){
         return (9-(col + 1))*10 + 9-(8 - row);
     }
@@ -266,6 +268,7 @@ function dragMouseDown(e) {
 
     dragging_piece = this;
     dragging_piece.style.position = 'absolute';
+    dragging_piece.classList.add('dragging');
     
     if (e.type === 'touchstart') {
         e.preventDefault(); // Prevent scrolling while dragging
@@ -307,20 +310,38 @@ function elementDrag(e) {
     dragging_piece.style.left = (left) + "px";     
 }
 
-    // when piece is placed
+// when piece is placed
 function closeDragElement() {
-    // stop moving when mouse button is released:
+// stop moving when mouse button is released:
 
     document.onmouseup = null;
     document.onmousemove = null;
     document.ontouchend = null;
     document.ontouchmove = null;
 
-    const square_id = get_square_id(parseInt(top), parseInt(left));
+    const board = document.getElementById('wrapper');
+    const squareSize = board.offsetWidth / 8;
+    const boardRect = board.getBoundingClientRect();
+
+    // Calculate the final position relative to the board
+    const finalTop = top;
+    const finalLeft = left;
+
+    // Calculate the target square
+    const row = Math.floor((finalTop + squareSize/2)/squareSize);
+    const col = Math.floor((finalLeft + squareSize/2)/squareSize);
+
+    let square_id;
+    if (is_rotated){
+        square_id = (9-(col + 1))*10 + 9-(8 - row);
+    } else {
+        square_id = (col + 1)*10 + (8 - row);
+    }
 
     dragging_piece.style.position = 'relative';
     dragging_piece.style.left = '';
     dragging_piece.style.top = '';
+    dragging_piece.classList.remove('dragging');
     movemake(start_square_id, square_id, valid_moves);
 }
 
@@ -333,40 +354,30 @@ function getIds(move) {
 
 function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_submit){
     let promotion = false;
-    let move_puzzle_format = b.to_readable(start_square_id)+b.to_readable(square_id); // e.g e2e4
 
-    // if piece is placed on the valid square
     if (valid_moves.includes(square_id)){
-        // if white pawn promoted
-        if (square_id % 10 == 8 && document.getElementById(start_square_id).childNodes[0].classList.contains('P')){
+        if ((square_id % 10 == 8 && document.getElementById(start_square_id).childNodes[0].classList.contains('P')) ||
+            (square_id % 10 == 1 && document.getElementById(start_square_id).childNodes[0].classList.contains('p'))){
             promotion = true;
             if(!forpgnnav){
                 let bar = document.getElementById('promotion-bar')
-                let t = 0;
-                let l = ((square_id-square_id%10)/10)*60-50+90;
-                if (is_rotated){t = 240; l=(9-(square_id-square_id%10)/10)*60+40}
-                bar.style = 'visibility: visible; top: '+t+'px; left: '+l+'px;'
-                for (let i = 0; i < 4; i++){
-                    const element = bar.childNodes[2*i+1];
-                    let img = icons.get(['Q', 'R', 'B', 'N'][i]);
-                    element.innerHTML = img;
+                const board = document.getElementById('wrapper');
+                const squareSize = board.offsetWidth / 8;
+                const boardRect = board.getBoundingClientRect();
+                const isWhite = square_id % 10 == 8;
+                
+                let t = isWhite ? 0 : board.offsetHeight - squareSize*4;
+                let l = boardRect.left + squareSize*((square_id-square_id%10)/10-1);
+                if (is_rotated){
+                    t = isWhite ? board.offsetHeight - squareSize*4 : 0;
+                    l = boardRect.left + squareSize*(9-(square_id-square_id%10)/10-1);
                 }
-            }
-
-        }
-        //if black pawn promoted
-        if (square_id % 10 == 1 && document.getElementById(start_square_id).childNodes[0].classList.contains('p')){
-            promotion = true;
-            if(!forpgnnav){
-                let bar = document.getElementById('promotion-bar')
-                let t = 240;
-                let l = ((square_id-square_id%10)/10)*60+40;
-                if (is_rotated){t = 0; l = (9-(square_id-square_id%10)/10)*60-50+90}
-                //console.log(' visibility: visible; top: '+t+'px; left: '+l+'px;');
-                bar.style = 'visibility: visible; top: '+t+'px; left: '+l+'px;';
+                
+                bar.style = 'visibility: visible; width: '+(squareSize-2)+'px; top: '+t+'px; left: '+l+'px;';
                 for (let i = 0; i < 4; i++){
                     const element = bar.childNodes[2*i+1];
-                    let img = icons.get(['q', 'r', 'b', 'n'][i]);
+                    element.style = 'width: '+(squareSize-2)+'px; height: '+squareSize+'px;';
+                    let img = icons.get(isWhite ? ['Q', 'R', 'B', 'N'][i] : ['q', 'r', 'b', 'n'][i]);
                     element.innerHTML = img;
                 }
             }

@@ -11,23 +11,18 @@
 {% block content %}
 
     <main id="container">
-        {% include 'puzzles/_board.html' %}
+        <div>
+            {% include 'puzzles/_board.html' %}
+            <div class="savecontainer">
+                <label for="exampleText">PGN:</label>
+                <textarea id="pgn_textarea" name="userMove" rows="4" cols="50"></textarea>
+            </div>
+        </div>
         <div>
             <div id="pgn" onclick="pgn_click(event)"></div>
+            <button id="saveGameButton" onclick="saveGame()">Save Game</button>
         </div>
     </main>
-    <!-- <br>
-    <button id="saveGameButton" onclick="saveGame()">Save Game</button>
-    
-    <label for="exampleText">pgn:</label>
-    <textarea id="pgn_textarea" name="userMove" rows="4" cols="50"></textarea>
-
-    <button id="printButton" style="display: none;">Print Text</button> -->
-    <div class="savecontainer">
-        <label for="exampleText">PGN:</label>
-        <textarea id="pgn_textarea" name="userMove" rows="4" cols="50"></textarea>
-    </div>
-    <button id="saveGameButton" onclick="saveGame()">Save Game</button>
 
     <script>
         let start_fen = '{{fen}}';

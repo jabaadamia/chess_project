@@ -1,10 +1,9 @@
 /* Container to center the content */
 .savecontainer {
     display: inline-block;
-    width: 460px;
+    width: min(80vw, 460px);
     position: relative;
-    left: 50px;
-    margin: 50px;
+    margin-top: 20px;
     padding: 10px;
     background-color: #383838;
     border-radius: 10px;
@@ -36,9 +35,8 @@ textarea {
 
 /* Button styling */
 #saveGameButton {
-    position: absolute;
-    margin-top: 50px;
-    margin-left: 100px;
+    position: relative;
+    margin: 20px auto;
     padding: 10px 20px;
     background-color: rgb(57, 152, 97);
     color: white;
@@ -47,6 +45,7 @@ textarea {
     font-size: 16px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    display: block;
 }
 
 #saveGameButton:hover {
@@ -55,8 +54,8 @@ textarea {
 
 /* Responsive design for smaller screens */
 @media screen and (max-width: 600px) {
-    .container {
-        width: 80%;
+    .savecontainer {
+        width: 85vw;
     }
 
     textarea {

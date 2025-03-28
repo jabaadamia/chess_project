@@ -17,26 +17,84 @@
 h3 {
     font-size: large;
     color: white;
+    margin-left: 10px;
+    padding: 5px 0;
 }
-a{
+
+a {
     color: white;
+    text-decoration: none;
 }
+
 p {
     color: white;
+    margin: 0;
+}
+
+#container {
+    position: relative;
+    top: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    align-items: flex-start;
 }
 
 #puzzle_data {
-    padding-left: 12.5rem;
+    min-height: 50px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 40px;
 }
 
-#puzzle_data div *{
+#puzzle_data div {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: center;
+}
+
+#puzzle_data div * {
+    margin-top: 10px;
     display: inline;
-    padding-right: 2rem;
+    padding-right: 0;
 }
 
-#message{
-    padding-top: 3px;
-    padding-bottom: 3px;
+#message {
+    padding: 3px 0;
     color: white;
     font-size: larger;
+    position: absolute;
+    top: -40px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+}
+
+#pgn {
+    height: 360px;
+}
+
+@media screen and (max-width: 600px) {
+    #container {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    #puzzle_data {
+        padding-left: 0;
+        text-align: center;
+        margin-top: 20px;
+        align-items: center;
+    }
+    
+    #message {
+        position: relative;
+        text-align: center;
+        margin-bottom: 10px;
+        top: 0;
+    }
 }

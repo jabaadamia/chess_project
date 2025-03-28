@@ -1,32 +1,33 @@
 /* *{
     font-family: 'Roboto Flex', sans-serif;
 } */
-#container{
-    position: relative;
-    top: 30px;
-    display: flex;
-}
-
 #wrapper{
     position: relative;
-    left: 100px;
-    width: 480px;
-    height: 480px;
-    /* border: 2px solid black; */
+    width: min(80vw, 480px);
+    height: min(80vw, 480px);
     display: inline-flex;
     flex-wrap: wrap;
 }
+
 #wrapper div {
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 12.5%;
+    height: 12.5%;
 }
 
 #wrapper div img{
-    width: 50px;
-    height: 50px;
+    width: 80%;
+    height: 80%;
     user-select: none;
     cursor: grab;
+}
+
+#wrapper div img.dragging {
+    width: 50px;
+    height: 50px;
+    z-index: 1000;
 }
 
 #promotion-bar{
@@ -34,36 +35,35 @@
     position: absolute;
     flex-direction: column;
     z-index: 1000;
-    border: solid 1px black;
-    visibility: hidden;
+    visibility: hidden; 
+    border: 1px solid #000000;
 }
+
 #promotion-bar div{
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 12.5%;
+    width: 12.5%;
 }
+
 #promotion-bar div img{
-    width: 50px;
-    height: 50px;
+    width: 80%;
+    height: 80%;
     user-select: none;
 }
 
 .white-square {
-    width: 60px;
-    height: 60px; 
     background-color: #F0D9B5;
 }
 
 .black-square {
-    width: 60px;
-    height: 60px;
     background-color: #B58863;
 }
 
-
 .circle {
-    width: 18px; 
-    height: 18px; 
+    width: 20%; 
+    height: 20%; 
     background-color: #3c3c3c7b;
     border-radius: 50%;
 }
@@ -74,7 +74,6 @@
     justify-content: center;
     align-items: center;
     position: relative;
-    left: 100px;
     background-color: #383838;
     border-radius: 0 0 8px 8px;
     padding: 2px;
@@ -93,17 +92,16 @@
 }
 
 #toolbar img {
-    width: 32px;
-    height: 32px;
+    width: 24px;
+    height: 24px;
     filter: brightness(0) invert(1);
 }
 
 /* Styling for the PGN container */
 #pgn {
     position: relative;
-    width: 300px;
-    height: 480px;
-    left: 200px;
+    width: min(300px, 80vw);
+    height: min(80vw, 400px);
     padding-top: 0px;
     border: 1px solid #555;
     background-color: #383838; 
@@ -134,14 +132,16 @@
 
 /* For responsiveness (smaller screens) */
 @media screen and (max-width: 600px) {
-    #pgn {
-        width: 80%;
-        left: 10%;
+    #container {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    #wrapper {
+        width: 90vw;
+        height: 90vw;
     }
 
-    #toolbar {
-        width: 90%;
-    }
 }
 
 .pgn-move {
