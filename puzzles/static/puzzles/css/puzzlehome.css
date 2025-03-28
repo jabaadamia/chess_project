@@ -106,3 +106,36 @@ h3{
 #test-button:hover {
     background-color: #92c399;
 }
+
+
+@media screen and (max-width: 600px) {
+    #main-container {
+        flex-direction: column;
+        padding: 1rem;
+        align-items: center;
+    }
+
+    .tag {
+        padding: 10px 30px;
+        font-size: 1.2rem;
+        margin: 0.5rem;
+    }
+
+    #test-container form {
+        width: 90vw;
+        height: auto;
+        min-height: 60vh;
+        margin: 10px 0;
+    }
+
+    #test-container input,
+    #test-container select,
+    #test-container textarea {
+        font-size: 16px;
+    }
+
+    #test-button {
+        font-size: 1rem;
+        padding: 8px 20px;
+    }
+}

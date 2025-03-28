@@ -116,7 +116,7 @@ body {
     }
 
     .barlink:hover {
-        background-color: rgba(57, 152, 97, 0.1);
+        color: rgba(57, 152, 97);
     }
 }
 
@@ -138,6 +138,7 @@ a.button {
     font-size: 1rem;
     transition: all 0.3s ease;
     border: 2px solid transparent;
+    white-space: nowrap;
 }
 
 /* Hover effect */
@@ -148,11 +149,23 @@ a.button:hover {
 }
 
 #logo {
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     transition: transform 0.3s ease;
 }
 
 #logo:hover {
     transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+    #login {
+        padding-right: 0.5rem;
+        gap: 0.5rem;
+    }
+
+    a.button {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
 }
