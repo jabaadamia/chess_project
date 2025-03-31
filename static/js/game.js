@@ -206,8 +206,6 @@ document.onkeydown = (e) =>{
                 // Trigger analysis after move is made
                 triggerAnalysis();
             }
-        } else {
-            play();
         }
     }
 }
@@ -551,6 +549,7 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false){
                 
                 movesound.play();
                 add_drag(b.move);
+                triggerAnalysis();
             }
             const hide = function (e) {
                 const bar = document.getElementById('promotion-bar');
@@ -610,6 +609,7 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false){
 
             movesound.play();
             add_drag(b.move);
+            triggerAnalysis();
         }
     }
 
