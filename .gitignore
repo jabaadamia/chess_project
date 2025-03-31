@@ -296,4 +296,11 @@ poetry.toml
 # LSP config files
 pyrightconfig.json
 
+# Stockfish files
+static/js/stockfish.js
+static/js/stockfish.wasm
+static/js/stockfish.worker.js
+static/js/stockfish.worker.wasm
+static/js/stockfish.wasm.js
+
 # End of https://www.toptal.com/developers/gitignore/api/macos,django,python
