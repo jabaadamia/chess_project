@@ -26,6 +26,87 @@ let b = new Board(start_fen);
 
 let cur_move = 0;
 
+// Global variables for analysis
+let latestEval = '';
+let latestBestMove = '';
+let isAnalyzing = false;
+let stockfish = null; // Global stockfish worker
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Create a Web Worker from the stockfish.js file
+    stockfish = new Worker('/static/js/stockfish.js');
+    
+    // Reference to output element
+    const outputElement = document.getElementById('output');
+    
+    // Set up event listener for messages from the engine
+    stockfish.onmessage = function(event) {
+        const message = event.data;
+        
+        // Capture evaluation information
+        if (message.startsWith('info') && message.includes('score cp')) {
+            // Extract score information
+            const scoreMatch = message.match(/score cp (-?\d+)/);
+            if (scoreMatch) {
+                let score = parseInt(scoreMatch[1]) / 100; // Convert centipawns to pawns
+                // If it's black's turn, invert the score to maintain white's perspective
+                if (b.move === 'b') {
+                    score = -score;
+                }
+                latestEval = score > 0 ? `+${score}` : `${score}`;
+            }
+        }
+        
+        // Store best move when found
+        if (message.startsWith('bestmove')) {
+            latestBestMove = message.split(' ')[1];
+            // Display both evaluation and best move
+            if (latestEval) {
+                outputElement.innerHTML = `
+                    <div><strong>Evaluation:</strong> ${latestEval}</div>
+                    <div><strong>Best move:</strong> ${latestBestMove}</div>
+                    <div class="hint">Press SPACE to make this move</div>
+                `;
+            } else {
+                outputElement.innerHTML = `
+                    <div><strong>Best move:</strong> ${latestBestMove}</div>
+                    <div class="hint">Press SPACE to make this move</div>
+                `;
+            }
+        }
+    };
+    
+    // Initialize the engine
+    stockfish.postMessage('uci');
+    
+    // Set up the analyze toggle
+    document.getElementById('analyze-btn').addEventListener('change', function() {
+        isAnalyzing = this.checked;
+        if (isAnalyzing) {
+            // Clear previous output
+            outputElement.innerHTML = 'Analyzing...';
+            
+            const fen = b.get_full_fen();
+            stockfish.postMessage('position fen ' + fen);
+            stockfish.postMessage('go depth 18');
+        } else {
+            outputElement.innerHTML = '';
+            latestEval = '';
+            latestBestMove = '';
+        }
+    });
+});
+
+// Function to trigger analysis
+function triggerAnalysis() {
+    if (isAnalyzing && stockfish) {
+        const outputElement = document.getElementById('output');
+        outputElement.innerHTML = 'Analyzing...';
+        const fen = b.get_full_fen();
+        stockfish.postMessage('position fen ' + fen);
+        stockfish.postMessage('go depth 15');
+    }
+}
 
 function parsePGN(pgn) {
     // Remove headers
@@ -111,7 +192,18 @@ document.onkeydown = (e) =>{
         nextmove();
     }
     if (e.code == 'Space'){
-        play();
+        const analyzeBtn = document.getElementById('analyze-btn');
+        if (analyzeBtn.checked && latestBestMove) {
+            const ids = getIds(latestBestMove);
+            const piece = b.get_bpiece_by_id(ids[0], b.board);
+            if (piece) {
+                movemake(ids[0], ids[1], b.valid_moves_of(ids[0], false, b.board, b.move, piece.toLowerCase()));
+                // Trigger analysis after move is made
+                triggerAnalysis();
+            }
+        } else {
+            play();
+        }
     }
 }
 
@@ -352,7 +444,7 @@ function getIds(move) {
     return [from, to];
 }
 
-function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_submit){
+function movemake(start_square_id, square_id, valid_moves, forpgnnav=false){
     let promotion = false;
 
     if (valid_moves.includes(square_id)){
@@ -469,9 +561,7 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_s
             document.getElementById(square_id).innerHTML = document.getElementById(start_square_id).innerHTML;
             document.getElementById(start_square_id).innerHTML = '';
             if(forpgnnav){b.cur_white_castles=[true,true], b.cur_black_castles=[true,true]}
-
             let move = b.make_move(parseInt(start_square_id), parseInt(square_id));
-            //console.log(move)
             if (b.is_checkmate(b.move)){
                 move = move.replace('+','#');
             }

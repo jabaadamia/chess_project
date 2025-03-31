@@ -54,7 +54,7 @@ textarea {
 
 /* Responsive design for smaller screens */
 @media screen and (max-width: 600px) {
-    .savecontainer {
+    .savecontainer, #output {
         width: 85vw;
     }
 
@@ -162,4 +162,71 @@ textarea {
 
 #saveGameModal button:hover {
     opacity: 0.9;
+}
+
+/* Analyze Button Toggle Switch Style */
+#analyze-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 50px;
+    height: 24px;
+    background-color: #666;
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#analyze-btn::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: white;
+    top: 2px;
+    left: 2px;
+    transition: all 0.3s ease;
+}
+
+#analyze-btn:checked {
+    background-color: rgb(57, 152, 97);
+}
+
+#analyze-btn:checked::before {
+    transform: translateX(26px);
+}
+
+#output {
+    margin-top: 15px;
+    min-height: 20px;
+    width: min(40vw, 260px);  /* Match savecontainer width */
+    padding: 15px;
+    background-color: #383838;
+    border-radius: 8px;
+    color: #e0e0e0;
+    font-size: 14px;
+    line-height: 1.5;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid #444;
+    transition: all 0.3s ease;
+}
+
+#output:empty {
+    display: none;
+}
+
+#output:not(:empty) {
+    display: block;
+}
+
+#output .hint {
+    margin-top: 10px;
+    color: #888;
+    font-style: italic;
+    font-size: 13px;
+}
+
+#output strong {
+    color: rgb(57, 152, 97);
 }

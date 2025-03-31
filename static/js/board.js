@@ -71,6 +71,10 @@ export class Board {
         this.draw_board(this.board);
     }
 
+    get_full_fen(board=this.board){
+        return this.get_pos_fen(board) + ' ' + this.move + ' ' + this.castles + ' ' + (this.passant_capture ? this.passant_capture : '-') + ' ' + this.half_moves + ' ' + this.full_moves;
+    }
+
     get_pos_fen(board=this.board){
         let fen_pos = '';
         let row_space_counter;
