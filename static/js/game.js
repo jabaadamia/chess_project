@@ -185,6 +185,11 @@ if(b.move == 'b'){
 add_drag(b.move);
 
 document.onkeydown = (e) =>{
+    // Check if modal is present
+    if (document.getElementById('saveGameModal')) {
+        return; // Exit if modal is shown
+    }
+
     if (e.code == 'ArrowLeft'){
         prevmove();
     }
