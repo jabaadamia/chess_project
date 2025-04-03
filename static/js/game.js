@@ -474,170 +474,192 @@ function getIds(move) {
     return [from, to];
 }
 
-function movemake(start_square_id, square_id, valid_moves, forpgnnav=false){
-    let promotion = false;
+// check if a move is a pawn promotion
+function isPromotion(start_square_id, square_id) {
+    return (square_id % 10 == 8 && document.getElementById(start_square_id).childNodes[0].classList.contains('P')) ||
+           (square_id % 10 == 1 && document.getElementById(start_square_id).childNodes[0].classList.contains('p'));
+}
 
-    if (valid_moves.includes(square_id)){
-        if ((square_id % 10 == 8 && document.getElementById(start_square_id).childNodes[0].classList.contains('P')) ||
-            (square_id % 10 == 1 && document.getElementById(start_square_id).childNodes[0].classList.contains('p'))){
-            promotion = true;
-            if(!forpgnnav){
-                let bar = document.getElementById('promotion-bar')
-                const board = document.getElementById('wrapper');
-                const squareSize = board.offsetWidth / 8;
-                const boardRect = board.getBoundingClientRect();
-                const isWhite = square_id % 10 == 8;
-                
-                let t = isWhite ? 0 : board.offsetHeight - squareSize*4;
-                let l = boardRect.left + squareSize*((square_id-square_id%10)/10-1);
-                if (is_rotated){
-                    t = isWhite ? board.offsetHeight - squareSize*4 : 0;
-                    l = boardRect.left + squareSize*(9-(square_id-square_id%10)/10-1);
-                }
-                
-                bar.style = 'visibility: visible; width: '+(squareSize-2)+'px; top: '+t+'px; left: '+l+'px;';
-                for (let i = 0; i < 4; i++){
-                    const element = bar.childNodes[2*i+1];
-                    element.style = 'width: '+(squareSize-2)+'px; height: '+squareSize+'px;';
-                    let img = icons.get(isWhite ? ['Q', 'R', 'B', 'N'][i] : ['q', 'r', 'b', 'n'][i]);
-                    element.innerHTML = img;
-                }
-            }
-        }
+// show the promotion bar for selecting a promotion piece
+function showPromotionBar(square_id, start_square_id) {
+    let bar = document.getElementById('promotion-bar');
+    const board = document.getElementById('wrapper');
+    const squareSize = board.offsetWidth / 8;
+    const boardRect = board.getBoundingClientRect();
+    const isWhite = square_id % 10 == 8;
+    
+    let t = isWhite ? 0 : board.offsetHeight - squareSize*4;
+    let l = boardRect.left + squareSize*((square_id-square_id%10)/10-1);
+    if (is_rotated){
+        t = isWhite ? board.offsetHeight - squareSize*4 : 0;
+        l = boardRect.left + squareSize*(9-(square_id-square_id%10)/10-1);
+    }
+    
+    bar.style = 'visibility: visible; width: '+(squareSize-2)+'px; top: '+t+'px; left: '+l+'px;';
+    for (let i = 0; i < 4; i++){
+        const element = bar.childNodes[2*i+1];
+        element.style = 'width: '+(squareSize-2)+'px; height: '+squareSize+'px;';
+        let img = icons.get(isWhite ? ['Q', 'R', 'B', 'N'][i] : ['q', 'r', 'b', 'n'][i]);
+        element.innerHTML = img;
+    }
+}
 
-        if (promotion){            
-            if(forpgnnav){
-                document.getElementById(start_square_id).innerHTML = '';
-                document.getElementById(square_id).innerHTML = icons.get(forpgnnav);
-                b.make_move(parseInt(start_square_id), parseInt(square_id), b.board, b.move, forpgnnav);
-                add_drag(b.move);
-                return;
-            }
+// handle PGN navigation promotion
+function handlePgnNavPromotion(start_square_id, square_id, forpgnnav) {
+    document.getElementById(start_square_id).innerHTML = '';
+    document.getElementById(square_id).innerHTML = icons.get(forpgnnav);
+    b.make_move(parseInt(start_square_id), parseInt(square_id), b.board, b.move, forpgnnav);
+    add_drag(b.move);
+}
 
-            document.getElementById('promotion-bar').onclick = function(e){
-                e.stopPropagation();
-                document.getElementById(square_id).innerHTML = '';
-                document.getElementById('promotion-bar').style.visibility = 'hidden';
-                let move;
-                if (e.target.tagName == 'IMG'){
-                    document.getElementById(start_square_id).innerHTML = '';
-                    document.getElementById(square_id).appendChild(e.target);
-                    move = b.to_readable(square_id)+'='+e.target.className.toUpperCase();
-                }
-                else{
-                    move = b.to_readable(square_id)+'='+e.target.childNodes[0].className.toUpperCase();
-                    document.getElementById(square_id).appendChild(e.target.childNodes[0]);
-                }
-
-                b.make_move(parseInt(start_square_id), parseInt(square_id), b.board, b.move, e.target.className);
-
-                if (b.is_check(b.move)){
-                    move += '+';
-                }
-                if (b.is_checkmate(b.move)){
-                    move = move.replace('+','#');
-                }
-
-                if (!forpgnnav){
-                    const m = document.createElement('p');
-                    m.style.position = 'absolute'
-                    m.innerText = move;
-                    m.id = 'm'+b.half_moves;
-                    m.classList.add('pgn-move');
-                    if (b.move == 'b'){
-                        let fullmovediv = document.createElement('div');
-                        fullmovediv.id = 'move'+b.full_moves;
-                        const movenum = document.createElement('p');
-                        movenum.innerText = b.full_moves+'.';
-                        fullmovediv.appendChild(movenum);
-                        m.style.left = '70px';
-                        fullmovediv.appendChild(m);
-                        pgn.appendChild(fullmovediv);
-                        from_tos.push([parseInt(start_square_id), square_id, move[3]]);
-                        unsaved_pgn_string += b.full_moves+'. '; 
-                    }else{
-                        let fullmovediv = document.getElementById('move'+(b.full_moves-1));
-                        if(!fullmovediv){
-                            fullmovediv = document.createElement('div');
-                            fullmovediv.id = 'move'+b.full_moves;
-                            const movenum = document.createElement('p');
-                            movenum.innerText = b.full_moves+'.';
-                            fullmovediv.appendChild(movenum);
-                            pgn.appendChild(fullmovediv);
-                        }
-                        m.style.left = '180px';
-                        fullmovediv.appendChild(m);
-                        from_tos.push([parseInt(start_square_id), square_id, move[3].toLowerCase()]);
-                    }
-                    unsaved_pgn_string += move + ' ';
-                    pgn_text_area.value = unsaved_pgn_string;
-                    cur_move++;
-                }
-                
-                movesound.play();
-                add_drag(b.move);
-                triggerAnalysis();
-            }
-            const hide = function (e) {
-                const bar = document.getElementById('promotion-bar');
-                if (bar.style.visibility !== 'hidden' && !bar.contains(e.target)) {
-                    bar.style.visibility = 'hidden';
-                }
-            };
-            setTimeout(() => {
-                document.getElementById('wrapper').addEventListener('mousedown', hide);
-            }, 100);
-            
-        }else{ // moves other than promotion
-            document.getElementById(square_id).innerHTML = document.getElementById(start_square_id).innerHTML;
+// handle promoted piece selection process
+function setupPromotionSelection(start_square_id, square_id, forpgnnav) {
+    document.getElementById('promotion-bar').onclick = function(e){
+        e.stopPropagation();
+        document.getElementById(square_id).innerHTML = '';
+        document.getElementById('promotion-bar').style.visibility = 'hidden';
+        let move;
+        if (e.target.tagName == 'IMG'){
             document.getElementById(start_square_id).innerHTML = '';
-            if(forpgnnav){b.cur_white_castles=[true,true], b.cur_black_castles=[true,true]}
-            let move = b.make_move(parseInt(start_square_id), parseInt(square_id));
-            if (b.is_checkmate(b.move)){
-                move = move.replace('+','#');
-            }
-            
-            
-            if (!forpgnnav){
-                const m = document.createElement('p');
-                m.innerText = move;
-                m.id = 'm'+b.half_moves;
-                m.classList.add('pgn-move');
-                if (b.move == 'b'){
-                    let fullmovediv = document.createElement('div');
-                    fullmovediv.id = 'move'+b.full_moves;
-                    const movenum = document.createElement('p');
-                    movenum.innerText = b.full_moves+'.';
-                    fullmovediv.appendChild(movenum);
-                    m.style.left = '70px';
-                    fullmovediv.appendChild(m);
-                    pgn.appendChild(fullmovediv);
-                    unsaved_pgn_string += b.full_moves+'. ';
-                }else{
-                    try {
-                        let fullmovediv = document.getElementById('move'+(b.full_moves-1));
-                        m.style.left = '180px';    
-                        fullmovediv.appendChild(m);
-                    } catch (error) { // first move is black
-                        let fullmovediv = document.createElement('div');
-                        fullmovediv.id = 'move'+(b.full_moves-1);
-                        pgn.appendChild(fullmovediv);
-                        m.style.left = '180px';    
-                        fullmovediv.appendChild(m);
-                    }
-                    
-                }
-                from_tos.push([parseInt(start_square_id), square_id]);
-                cur_move++;
-                
-                unsaved_pgn_string += move + ' ';
-                pgn_text_area.value = unsaved_pgn_string;
-            }
-
-            movesound.play();
-            add_drag(b.move);
-            triggerAnalysis();
+            document.getElementById(square_id).appendChild(e.target);
+            move = b.to_readable(square_id)+'='+e.target.className.toUpperCase();
         }
+        else{
+            move = b.to_readable(square_id)+'='+e.target.childNodes[0].className.toUpperCase();
+            document.getElementById(square_id).appendChild(e.target.childNodes[0]);
+        }
+
+        b.make_move(parseInt(start_square_id), parseInt(square_id), b.board, b.move, e.target.className);
+
+        if (b.is_check(b.move)){
+            move += '+';
+        }
+        if (b.is_checkmate(b.move)){
+            move = move.replace('+','#');
+        }
+
+        if (!forpgnnav){
+            updatePgn(move, start_square_id, square_id, true);
+        }
+        
+        movesound.play();
+        add_drag(b.move);
+        triggerAnalysis();
+    }
+    
+    // setup click outside handler to hide promotion bar
+    const hide = function (e) {
+        const bar = document.getElementById('promotion-bar');
+        if (bar.style.visibility !== 'hidden' && !bar.contains(e.target)) {
+            bar.style.visibility = 'hidden';
+        }
+    };
+    setTimeout(() => {
+        document.getElementById('wrapper').addEventListener('mousedown', hide);
+    }, 100);
+}
+
+// handle regular (non-promotion) moves
+function handleRegularMove(start_square_id, square_id, forpgnnav) {
+    document.getElementById(square_id).innerHTML = document.getElementById(start_square_id).innerHTML;
+    document.getElementById(start_square_id).innerHTML = '';
+    
+    if(forpgnnav) {
+        b.cur_white_castles=[true,true];
+        b.cur_black_castles=[true,true];
+    }
+    
+    let move = b.make_move(parseInt(start_square_id), parseInt(square_id));
+    if (b.is_checkmate(b.move)){
+        move = move.replace('+','#');
+    }
+    
+    if (!forpgnnav){
+        updatePgn(move, start_square_id, square_id, false);
+    }
+
+    movesound.play();
+    add_drag(b.move);
+    triggerAnalysis();
+}
+
+// Update the PGN notation
+function updatePgn(move, start_square_id, square_id, isPromotion) {
+    const m = document.createElement('p');
+    m.innerText = move;
+    m.id = 'm'+b.half_moves;
+    m.classList.add('pgn-move');
+    
+    if (b.move == 'b'){
+        let fullmovediv = document.createElement('div');
+        fullmovediv.id = 'move'+b.full_moves;
+        const movenum = document.createElement('p');
+        movenum.innerText = b.full_moves+'.';
+        fullmovediv.appendChild(movenum);
+        m.style.left = '70px';
+        fullmovediv.appendChild(m);
+        pgn.appendChild(fullmovediv);
+        
+        if (isPromotion) {
+            from_tos.push([parseInt(start_square_id), square_id, move[3]]);
+        } else {
+            from_tos.push([parseInt(start_square_id), square_id]);
+        }
+        
+        unsaved_pgn_string += b.full_moves+'. ';
+    } else {
+        try {
+            let fullmovediv = document.getElementById('move'+(b.full_moves-1));
+            if(!fullmovediv && isPromotion){
+                fullmovediv = document.createElement('div');
+                fullmovediv.id = 'move'+b.full_moves;
+                const movenum = document.createElement('p');
+                movenum.innerText = b.full_moves+'.';
+                fullmovediv.appendChild(movenum);
+                pgn.appendChild(fullmovediv);
+            } else if (!fullmovediv) { // first move is black
+                fullmovediv = document.createElement('div');
+                fullmovediv.id = 'move'+(b.full_moves-1);
+                pgn.appendChild(fullmovediv);
+            }
+            m.style.left = '180px';
+            fullmovediv.appendChild(m);
+            
+            if (isPromotion) {
+                from_tos.push([parseInt(start_square_id), square_id, move[3].toLowerCase()]);
+            } else {
+                from_tos.push([parseInt(start_square_id), square_id]);
+            }
+        } catch (error) {
+            console.error("Error updating PGN for black move:", error);
+        }
+    }
+    
+    unsaved_pgn_string += move + ' ';
+    pgn_text_area.value = unsaved_pgn_string;
+    cur_move++;
+}
+
+// main move function
+function movemake(start_square_id, square_id, valid_moves, forpgnnav=false){
+    if (!valid_moves.includes(square_id)){
+        // remove visuals for valid squares
+        visualise_valid_squares(valid_moves, true); 
+        valid_moves = [];
+        return;
+    }
+    
+    const promotion = isPromotion(start_square_id, square_id);
+
+    if (promotion){
+        if(forpgnnav){
+            handlePgnNavPromotion(start_square_id, square_id, forpgnnav);
+        } else {
+            showPromotionBar(square_id, start_square_id);
+            setupPromotionSelection(start_square_id, square_id, forpgnnav);
+        }
+    } else {
+        handleRegularMove(start_square_id, square_id, forpgnnav);
     }
 
     visualise_valid_squares(valid_moves, true);

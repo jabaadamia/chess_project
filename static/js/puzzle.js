@@ -325,7 +325,11 @@ async function submitMove(move) {
             prevmove();
             
             if (lastMove) {
-                lastMove.parentNode.remove(); // Remove the entire move div
+                if (b.move == 'w'){
+                    lastMove.parentNode.remove(); // Remove the entire move div
+                }else{
+                    lastMove.remove()
+                }
             }
             // Remove the last move from from_tos array
             from_tos.pop(); 
@@ -333,182 +337,223 @@ async function submitMove(move) {
             add_drag(b.move);
 
             currentSolution = currentSolution.split(' ').slice(0, -1).join(' '); 
-            // You might want to reset the board state here as well
         }
     })
     .catch(error => console.error('Error:', error));
 }
 
 
+// Check if a move is a pawn promotion
+function isPromotion(start_square_id, square_id) {
+    return (square_id % 10 == 8 && document.getElementById(start_square_id).childNodes[0].classList.contains('P')) ||
+           (square_id % 10 == 1 && document.getElementById(start_square_id).childNodes[0].classList.contains('p'));
+}
+
+// Show the promotion bar for selecting a promotion piece
+function showPromotionBar(square_id, start_square_id) {
+    let bar = document.getElementById('promotion-bar');
+    const board = document.getElementById('wrapper');
+    const squareSize = board.offsetWidth / 8;
+    const boardRect = board.getBoundingClientRect();
+    const isWhite = square_id % 10 == 8;
+    
+    let t = isWhite ? 0 : board.offsetHeight - squareSize*4;
+    let l = boardRect.left + squareSize*((square_id-square_id%10)/10-1);
+    if (is_rotated){
+        t = isWhite ? board.offsetHeight - squareSize*4 : 0;
+        l = boardRect.left + squareSize*(9-(square_id-square_id%10)/10-1);
+    }
+    
+    bar.style = 'visibility: visible; width: '+(squareSize-2)+'px; top: '+t+'px; left: '+l+'px;';
+    for (let i = 0; i < 4; i++){
+        const element = bar.childNodes[2*i+1];
+        element.style = 'width: '+(squareSize-2)+'px; height: '+squareSize+'px;';
+        let img = icons.get(isWhite ? ['Q', 'R', 'B', 'N'][i] : ['q', 'r', 'b', 'n'][i]);
+        element.innerHTML = img;
+    }
+}
+
+// Handle PGN navigation promotion
+function handlePgnNavPromotion(start_square_id, square_id, forpgnnav) {
+    document.getElementById(start_square_id).innerHTML = '';
+    document.getElementById(square_id).innerHTML = icons.get(forpgnnav);
+    b.make_move(parseInt(start_square_id), parseInt(square_id), b.board, b.move, forpgnnav);
+    add_drag(b.move);
+}
+
+// Setup the promotion selection process
+function setupPromotionSelection(start_square_id, square_id, forpgnnav, move_puzzle_format, to_submit) {
+    document.getElementById('promotion-bar').onclick = function(e){
+        e.stopPropagation();
+        document.getElementById(square_id).innerHTML = '';
+        document.getElementById('promotion-bar').style.visibility = 'hidden';
+        let move;
+        if (e.target.tagName == 'IMG'){
+            document.getElementById(start_square_id).innerHTML = '';
+            document.getElementById(square_id).appendChild(e.target);
+            move = b.to_readable(square_id)+'='+e.target.className.toUpperCase();
+        }
+        else{
+            move = b.to_readable(square_id)+'='+e.target.childNodes[0].className.toUpperCase();
+            document.getElementById(square_id).appendChild(e.target.childNodes[0]);
+        }
+
+        b.make_move(parseInt(start_square_id), parseInt(square_id), b.board, b.move, e.target.className);
+
+        if (b.is_check(b.move)){
+            move += '+';
+        }
+        if (b.is_checkmate(b.move)){
+            move = move.replace('+','#');
+        }
+
+        if (!forpgnnav){
+            updatePgnForPromotion(move, start_square_id, square_id);
+            if (to_submit){
+                submitMove(move_puzzle_format);
+            }
+        }
+        
+        movesound.play();
+        add_drag(b.move);
+    }
+    
+    // Setup click outside handler to hide promotion bar
+    const hide = function (e) {
+        const bar = document.getElementById('promotion-bar');
+        if (bar.style.visibility !== 'hidden' && !bar.contains(e.target)) {
+            bar.style.visibility = 'hidden';
+        }
+    };
+    setTimeout(() => {
+        document.getElementById('wrapper').addEventListener('mousedown', hide);
+    }, 100);
+}
+
+// Update PGN for promotion moves
+function updatePgnForPromotion(move, start_square_id, square_id) {
+    const m = document.createElement('p');
+    m.style.position = 'absolute';
+    m.innerText = move;
+    m.id = 'm'+b.half_moves;
+    m.classList.add('pgn-move');
+    
+    if (b.move == 'b'){
+        let fullmovediv = document.createElement('div');
+        fullmovediv.id = 'move'+b.full_moves;
+        const movenum = document.createElement('p');
+        movenum.innerText = b.full_moves+'.';
+        fullmovediv.appendChild(movenum);
+        m.style.left = '70px';
+        fullmovediv.appendChild(m);
+        pgn.appendChild(fullmovediv);
+        from_tos.push([parseInt(start_square_id), square_id, move[3]]);
+    } else {
+        let fullmovediv = document.getElementById('move'+(b.full_moves-1));
+        if(!fullmovediv){
+            fullmovediv = document.createElement('div');
+            fullmovediv.id = 'move'+b.full_moves;
+            const movenum = document.createElement('p');
+            movenum.innerText = b.full_moves+'.';
+            fullmovediv.appendChild(movenum);
+            pgn.appendChild(fullmovediv);
+        }
+        m.style.left = '180px';
+        fullmovediv.appendChild(m);
+        from_tos.push([parseInt(start_square_id), square_id, move[3].toLowerCase()]);
+    }
+    cur_move++;
+}
+
+// Handle regular (non-promotion) moves
+function handleRegularMove(start_square_id, square_id, forpgnnav, move_puzzle_format, to_submit) {
+    document.getElementById(square_id).innerHTML = document.getElementById(start_square_id).innerHTML;
+    document.getElementById(start_square_id).innerHTML = '';
+    
+    if(forpgnnav) {
+        b.cur_white_castles = [true, true];
+        b.cur_black_castles = [true, true];
+    }
+    
+    let move = b.make_move(parseInt(start_square_id), parseInt(square_id));
+    
+    if (b.is_checkmate(b.move)){
+        move = move.replace('+','#');
+    }
+    
+    if (!forpgnnav){
+        updatePgnForRegularMove(move, start_square_id, square_id);
+        if (to_submit){
+            submitMove(move_puzzle_format);
+        }
+    }
+
+    movesound.play();
+    add_drag(b.move);
+}
+
+// Update PGN for regular moves
+function updatePgnForRegularMove(move, start_square_id, square_id) {
+    const m = document.createElement('p');
+    m.innerText = move;
+    m.id = 'm'+b.half_moves;
+    m.classList.add('pgn-move');
+    
+    if (b.move == 'b'){
+        let fullmovediv = document.createElement('div');
+        fullmovediv.id = 'move'+b.full_moves;
+        const movenum = document.createElement('p');
+        movenum.innerText = b.full_moves+'.';
+        fullmovediv.appendChild(movenum);
+        m.style.left = '70px';
+        fullmovediv.appendChild(m);
+        pgn.appendChild(fullmovediv);
+    } else {
+        try {
+            let fullmovediv = document.getElementById('move'+(b.full_moves-1));
+            m.style.left = '180px';    
+            fullmovediv.appendChild(m);
+        } catch (error) { // first move is black
+            let fullmovediv = document.createElement('div');
+            fullmovediv.id = 'move'+(b.full_moves-1);
+            pgn.appendChild(fullmovediv);
+            m.style.left = '180px';    
+            fullmovediv.appendChild(m);
+        }
+    }
+    from_tos.push([parseInt(start_square_id), square_id]);
+    cur_move++;
+}
+
+// Main function to handle chess moves
 function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_submit=true){
     let promotion = false;
     let move_puzzle_format = b.to_readable(start_square_id)+b.to_readable(square_id);
 
-    if (valid_moves.includes(square_id)){
-        if ((square_id % 10 == 8 && document.getElementById(start_square_id).childNodes[0].classList.contains('P')) ||
-            (square_id % 10 == 1 && document.getElementById(start_square_id).childNodes[0].classList.contains('p'))){
-            promotion = true;
-            if(!forpgnnav){
-                let bar = document.getElementById('promotion-bar')
-                const board = document.getElementById('wrapper');
-                const squareSize = board.offsetWidth / 8;
-                const boardRect = board.getBoundingClientRect();
-                const isWhite = square_id % 10 == 8;
-                
-                let t = isWhite ? 0 : board.offsetHeight - squareSize*4;
-                let l = boardRect.left + squareSize*((square_id-square_id%10)/10-1);
-                if (is_rotated){
-                    t = isWhite ? board.offsetHeight - squareSize*4 : 0;
-                    l = boardRect.left + squareSize*(9-(square_id-square_id%10)/10-1);
-                }
-                
-                bar.style = 'visibility: visible; width: '+(squareSize-2)+'px; top: '+t+'px; left: '+l+'px;';
-                for (let i = 0; i < 4; i++){
-                    const element = bar.childNodes[2*i+1];
-                    element.style = 'width: '+(squareSize-2)+'px; height: '+squareSize+'px;';
-                    let img = icons.get(isWhite ? ['Q', 'R', 'B', 'N'][i] : ['q', 'r', 'b', 'n'][i]);
-                    element.innerHTML = img;
-                }
-            }
+    if (!valid_moves.includes(square_id)){
+        visualise_valid_squares(valid_moves, true);
+        valid_moves = [];
+        return;
+    }
+    
+    promotion = isPromotion(start_square_id, square_id);
+
+    if (promotion){
+        if(!forpgnnav){
+            showPromotionBar(square_id, start_square_id);
         }
-
-        if (promotion){            
-            if(forpgnnav){
-                document.getElementById(start_square_id).innerHTML = '';
-                document.getElementById(square_id).innerHTML = icons.get(forpgnnav);
-                b.make_move(parseInt(start_square_id), parseInt(square_id), b.board, b.move, forpgnnav);
-                add_drag(b.move);
-                return;
-            }
-
-            document.getElementById('promotion-bar').onclick = function(e){
-                e.stopPropagation();
-                document.getElementById(square_id).innerHTML = '';
-                document.getElementById('promotion-bar').style.visibility = 'hidden';
-                let move;
-                if (e.target.tagName == 'IMG'){
-                    document.getElementById(start_square_id).innerHTML = '';
-                    document.getElementById(square_id).appendChild(e.target);
-                    move = b.to_readable(square_id)+'='+e.target.className.toUpperCase();
-                }
-                else{
-                    move = b.to_readable(square_id)+'='+e.target.childNodes[0].className.toUpperCase();
-                    document.getElementById(square_id).appendChild(e.target.childNodes[0]);
-                }
-
-                b.make_move(parseInt(start_square_id), parseInt(square_id), b.board, b.move, e.target.className);
-
-                if (b.is_check(b.move)){
-                    move += '+';
-                }
-                if (b.is_checkmate(b.move)){
-                    move = move.replace('+','#');
-                }
-
-                if (!forpgnnav){
-                    const m = document.createElement('p');
-                    m.style.position = 'absolute'
-                    m.innerText = move;
-                    m.id = 'm'+b.half_moves;
-                    m.classList.add('pgn-move');
-                    if (b.move == 'b'){
-                        let fullmovediv = document.createElement('div');
-                        fullmovediv.id = 'move'+b.full_moves;
-                        const movenum = document.createElement('p');
-                        movenum.innerText = b.full_moves+'.';
-                        fullmovediv.appendChild(movenum);
-                        m.style.left = '70px';
-                        fullmovediv.appendChild(m);
-                        pgn.appendChild(fullmovediv);
-                        from_tos.push([parseInt(start_square_id), square_id, move[3]]); 
-                    }else{
-                        let fullmovediv = document.getElementById('move'+(b.full_moves-1));
-                        if(!fullmovediv){
-                            fullmovediv = document.createElement('div');
-                            fullmovediv.id = 'move'+b.full_moves;
-                            const movenum = document.createElement('p');
-                            movenum.innerText = b.full_moves+'.';
-                            fullmovediv.appendChild(movenum);
-                            pgn.appendChild(fullmovediv);
-                        }
-                        m.style.left = '180px';
-                        fullmovediv.appendChild(m);
-                        from_tos.push([parseInt(start_square_id), square_id, move[3].toLowerCase()]);
-                    }
-                    cur_move++;
-                    if (to_submit){
-                        submitMove(move_puzzle_format);
-                    }
-                }
-                
-                movesound.play();
-                add_drag(b.move);
-            }
-            const hide = function (e) {
-                const bar = document.getElementById('promotion-bar');
-                if (bar.style.visibility !== 'hidden' && !bar.contains(e.target)) {
-                    bar.style.visibility = 'hidden';
-                }
-            };
-            setTimeout(() => {
-                document.getElementById('wrapper').addEventListener('mousedown', hide);
-            }, 100);
-            
-        }else{ // moves other than promotion
-            document.getElementById(square_id).innerHTML = document.getElementById(start_square_id).innerHTML;
-            document.getElementById(start_square_id).innerHTML = '';
-            if(forpgnnav){b.cur_white_castles=[true,true], b.cur_black_castles=[true,true]}
-
-            let move = b.make_move(parseInt(start_square_id), parseInt(square_id));
-            //console.log(move)
-            if (b.is_checkmate(b.move)){
-                move = move.replace('+','#');
-            }
-            
-            
-            if (!forpgnnav){
-                const m = document.createElement('p');
-                //m.style.position = 'absolute';
-                m.innerText = move;
-                m.id = 'm'+b.half_moves;
-                m.classList.add('pgn-move');
-                if (b.move == 'b'){
-                    let fullmovediv = document.createElement('div');
-                    fullmovediv.id = 'move'+b.full_moves;
-                    const movenum = document.createElement('p');
-                    movenum.innerText = b.full_moves+'.';
-                    fullmovediv.appendChild(movenum);
-                    m.style.left = '70px';
-                    fullmovediv.appendChild(m);
-                    pgn.appendChild(fullmovediv);  
-                }else{
-                    try {
-                        let fullmovediv = document.getElementById('move'+(b.full_moves-1));
-                        m.style.left = '180px';    
-                        fullmovediv.appendChild(m);
-                    } catch (error) { // first move is black
-                        let fullmovediv = document.createElement('div');
-                        fullmovediv.id = 'move'+(b.full_moves-1);
-                        pgn.appendChild(fullmovediv);
-                        m.style.left = '180px';    
-                        fullmovediv.appendChild(m);
-                    }
-                    
-                }
-                from_tos.push([parseInt(start_square_id), square_id]);
-                cur_move++;
-                if (to_submit){
-                    submitMove(move_puzzle_format);
-                }
-            }
-
-            movesound.play();
-            add_drag(b.move);
+        
+        if(forpgnnav){
+            handlePgnNavPromotion(start_square_id, square_id, forpgnnav);
+            return;
+        } else {
+            setupPromotionSelection(start_square_id, square_id, forpgnnav, move_puzzle_format, to_submit);
         }
+    } else {
+        handleRegularMove(start_square_id, square_id, forpgnnav, move_puzzle_format, to_submit);
     }
 
     visualise_valid_squares(valid_moves, true);
     valid_moves = [];
 }
-
 
