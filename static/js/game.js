@@ -44,27 +44,38 @@ document.addEventListener('DOMContentLoaded', function() {
         const message = event.data;
         
         // Capture evaluation information
-        if (message.startsWith('info') && message.includes('score cp')) {
+        if (message.startsWith('info') && message.includes('score cp') || message.includes("mate")) {
             // Extract score information
+            
+            if(message.includes("mate")){
+                const mateMatch = message.match(/ mate (\d+)/);
+                latestEval = "M"+mateMatch[1];
+            }else{
+            
             const scoreMatch = message.match(/score cp (-?\d+)/);
             if (scoreMatch) {
-                let score = parseInt(scoreMatch[1]) / 100; // Convert centipawns to pawns
-                // If it's black's turn, invert the score to maintain white's perspective
+                let score = parseInt(scoreMatch[1]) / 100;
+                
                 if (b.move === 'b') {
                     score = -score;
                 }
                 latestEval = score > 0 ? `+${score}` : `${score}`;
             }
+            }
         }
         
+
+        //console.log(message)
         // Store best move when found
-        if (message.startsWith('bestmove')) {
-            latestBestMove = message.split(' ')[1];
+        if (message.startsWith('info') && message.includes('depth')) {
+            const {depth, moves} = parseEvalInfo(message);
+            latestBestMove = moves[0];
             // Display both evaluation and best move
             if (latestEval) {
                 outputElement.innerHTML = `
                     <div><strong>Evaluation:</strong> ${latestEval}</div>
-                    <div><strong>Best move:</strong> ${latestBestMove}</div>
+                    <div><strong>depth: </strong>${depth}</div>
+                    <div><strong></strong>${moves.join(' ')}</div>
                     <div class="hint">Press SPACE to make this move</div>
                 `;
             } else {
@@ -87,8 +98,9 @@ document.addEventListener('DOMContentLoaded', function() {
             outputElement.innerHTML = 'Analyzing...';
             
             const fen = b.get_full_fen();
+            console.log(fen);
             stockfish.postMessage('position fen ' + fen);
-            stockfish.postMessage('go depth 18');
+            stockfish.postMessage('go depth 17');
         } else {
             outputElement.innerHTML = '';
             latestEval = '';
@@ -96,6 +108,21 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+function parseEvalInfo(inputString) {
+    // Extract the depth
+    const depthMatch = inputString.match(/depth (\d+)/);
+    const depth = depthMatch ? depthMatch[1] : null;
+    
+    // Extract the moves from the PV (principal variation)
+    
+    const moves = inputString.split('pv')[2].trim().split(' ').slice(0, 6);
+   
+    return {
+        depth,
+        moves
+    };
+  }
 
 // Function to trigger analysis
 function triggerAnalysis() {
