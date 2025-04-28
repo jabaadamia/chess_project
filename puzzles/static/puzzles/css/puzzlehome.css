@@ -34,11 +34,10 @@ h3{
     font-size: 1.5rem;
     border: 2px solid transparent;
     border-radius: 4px;
-    transition: background-color 0.3s, color 0.3s, border-color 0.3s; /* Smooth transition */
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
     margin-top: 1rem;
 }
 
-/* Number styling */
 .tag span {
     position: absolute; 
     bottom: 2px;
@@ -51,6 +50,9 @@ h3{
     background-color: #575757;
 }
 
+.tag.solved {
+    border-bottom: 3px solid rgb(57, 152, 97);
+}
 
 #test-container form {
     width: 20rem;

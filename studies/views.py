@@ -7,11 +7,12 @@ import json
 from django.urls import reverse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http.response import JsonResponse
-from django.views.generic import DetailView, TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import DetailView, TemplateView, ListView
 from django.views.decorators.http import require_POST
 from django.utils.decorators import method_decorator
 
-from .models import Game
+from .models import Game, Category, Endgame
 
 
 class AnalyzeBoard(TemplateView):
@@ -108,3 +109,78 @@ class DeleteGame(DetailView):
             return JsonResponse({"error": "You are not authorized to delete this game"}, status=403)
         game.delete()
         return JsonResponse({"message": "Game deleted successfully"})
+
+
+class EndgameHome(ListView):
+    model = Category
+    context_object_name = 'categories'
+    template_name = 'studies/endgame_home.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        categories = Category.objects.all()
+        endgames_per_category = {}
+
+        for category in categories:
+            cat_endgames = Endgame.objects.filter(category=category)
+            count = cat_endgames.count()
+            first = cat_endgames.first()
+
+            if first:
+                endgames_per_category[category.name] = {
+                    'count': count,
+                    'user_solved_count': None,
+                    'url': reverse('category_endgame_list', kwargs={'category_name': category.name, 'endgame_id': first.pk})
+                }
+            else:
+                endgames_per_category[category.name] = {
+                    'count': count,
+                    'user_solved_count': None,
+                    'url': reverse('endgame_home')
+                }
+
+            if self.request.user.is_authenticated:
+                endgames_per_category[category.name]['user_solved_count'] = self.request.user.solved_endgames.filter(category=category).count()
+
+        context["endgames_per_category"] = endgames_per_category
+        return context
+
+
+class EndgamesByCategoryView(LoginRequiredMixin, TemplateView):
+    template_name = 'studies/endgames_by_category.html'
+
+    def get_queryset(self):
+        category_name = self.kwargs['category_name']
+        return Endgame.objects.filter(category__name=category_name)
+
+    def get_next_endgame_id(self):
+        current_user = self.request.user
+        current_id = self.kwargs['endgame_id']
+
+        unsolved = self.get_queryset().exclude(id__in=current_user.solved_endgames.all()).exclude(id=current_id).order_by('id').first()
+
+        if not unsolved:
+            unsolved = self.get_queryset().order_by('id').first()
+
+        return unsolved.pk if unsolved else None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        category_name = self.kwargs['category_name']
+        endgame_id = self.kwargs['endgame_id']
+
+        context['category'] = get_object_or_404(Category, name=category_name)
+        context['detail_endgame'] = get_object_or_404(Endgame, pk=endgame_id)
+        context['next_endgame_id'] = self.get_next_endgame_id()
+        context['endgames'] = self.get_queryset()
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return JsonResponse({'error': 'Unauthorized'}, status=401)
+
+        endgame = get_object_or_404(Endgame, id=self.kwargs['endgame_id'])
+        request.user.solved_endgames.add(endgame)
+        return JsonResponse({'solved': True, 'next_endgame_id': self.get_next_endgame_id()})

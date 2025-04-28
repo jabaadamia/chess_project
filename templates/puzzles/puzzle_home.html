@@ -14,48 +14,38 @@
 <div id="main-container">
     
     <div>
-    <div class="title"><h3>Puzzles By Theme</h3></div>
-    <div id="tag-container">
-    
-    {% for tag, data in puzzles_per_tag_count.items %}
-        {% if user.is_authenticated%}
-            
-            {% if data.count == data.user_solved_count %}
-                <a href="{{ data.url }}" class="tag" style="border-bottom-color:   rgb(57, 152, 97);">
-                    {{ tag }}
-                    <span>{{data.user_solved_count}} / {{ data.count }}</span>
-                </a>
-            {% else %}
-                <a href="{{ data.url }}" class="tag">
-                    {{ tag }}
-                    <span>{{data.user_solved_count}} / {{ data.count }}</span>
-                </a>
-            {% endif %}
-
+      <div class="title"><h3>Puzzles By Theme</h3></div>
+      <div id="tag-container">
+      
+      {% for tag, data in puzzles_per_tag_count.items %}
+        {% if user.is_authenticated %}
+          <a href="{{ data.url }}" class="tag {% if data.count == data.user_solved_count %}solved{% endif %}">
+            {{ tag }}
+            <span>{{ data.user_solved_count }} / {{ data.count }}</span>
+          </a>
         {% else %}
-            <a href="{{ data.url }}" class="tag">
-                {{ tag }}
-                <span>{{ data.count }}</span>
-            </a>
+          <a href="{{ data.url }}" class="tag">
+            {{ tag }}
+            <span>{{ data.count }}</span>
+          </a>
         {% endif %}
-    {% endfor %}
-    </div>
+      {% endfor %}
+      
+      </div>
     </div>
     
     <div>
-        <div class="title"><h3>Take Test</h3></div>
-        <div id="test-container">
-            <form method="get" action="{% url 'puzzle_test' 1 %}">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit" id="test-button">start test</button>
-            </form>
-        </div>
+      <div class="title"><h3>Take Test</h3></div>
+      <div id="test-container">
+        <form method="get" action="{% url 'puzzle_test' 1 %}">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button type="submit" id="test-button">start test</button>
+        </form>
+      </div>
     </div>
-    
-
-</div>
-
+  
+  </div>
 
 
 

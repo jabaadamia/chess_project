@@ -22,3 +22,27 @@ class Game(models.Model):
             self.user = user
         self.updated_at = now()
         self.save()
+
+
+class Category(models.Model):
+    name = models.CharField(max_length=63, unique=True)
+
+    def __str__(self):
+        return self.name
+    
+class Endgame(models.Model):
+    fen = models.CharField(max_length=100)
+    is_win = models.BooleanField(default=True) # false for draw
+    category = models.ForeignKey(
+        Category,
+        related_name='endgames',
+        on_delete=models.CASCADE
+    )
+    solved_by_users = models.ManyToManyField(
+        CustomUser,
+        related_name='solved_endgames',
+        blank=True
+    )
+
+    def __str__(self):
+        return self.fen
