@@ -343,11 +343,7 @@ function setupPromotionSelection(start_square_id, square_id) {
 
         movesound.play();
         add_drag(b.move);
-        if (b.is_checkmate(b.move)){
-            console.log("checkmate")
-        }else{
-            makeStockFishMove();    
-        }
+        check_status(false);
     }
     
     // setup click outside handler to hide promotion bar
@@ -377,45 +373,59 @@ function handleRegularMove(start_square_id, square_id) {
     cur_move++;
 }
 
+const check_status = (stockfish) => {
+    const endedDraw = (b.full_moves > 50 && latestEvalScore <= 1 || b.is_insufficient_material()) || b.is_stealmate();
+    // draw acomplished
+    if(endedDraw){
+        if(!is_win){
+            markEndgameAsSolved();
+        }else{
+            handleReset();
+        }
+    }else if (b.is_checkmate(b.move)){
+        if(b.move != playerColor){
+            markEndgameAsSolved();
+        }else{
+            handleReset();
+        }
+    }else{
+        if (!stockfish){
+            makeStockFishMove();
+        }
+    }
+}
+
 
 // main move function
-function movemake(start_square_id, square_id, valid_moves, stockfish=false){
+function movemake(start_square_id, square_id, valid_moves, stockfish=false, stockfishPromotedPiece=null){
     if (!valid_moves.includes(square_id)){
         // remove visuals for valid squares
         visualise_valid_squares(valid_moves, true); 
         valid_moves = [];
         return;
     }
-    
     const promotion = isPromotion(start_square_id, square_id);
-
+    
     if (promotion){
-        showPromotionBar(square_id, start_square_id);
-        setupPromotionSelection(start_square_id, square_id);
+        if(stockfishPromotedPiece != null){
+            stockfishPromotedPiece = b.move == "w" ? stockfishPromotedPiece.toUpperCase() : stockfishPromotedPiece;
+            document.getElementById(start_square_id).innerHTML = '';
+            document.getElementById(square_id).innerHTML += icons.get(stockfishPromotedPiece);
+            
+            b.make_move(parseInt(start_square_id), parseInt(square_id), b.board, b.move, stockfishPromotedPiece);
+
+            movesound.play();
+            add_drag(b.move);
+            check_status(stockfish);
+        }else{
+            showPromotionBar(square_id, start_square_id);
+            setupPromotionSelection(start_square_id, square_id);
+        }
     } else {
         handleRegularMove(start_square_id, square_id);
-
-        const endedDraw = (b.full_moves > 50 && latestEvalScore <= 1 || b.is_insufficient_material()) || b.is_stealmate();
-        // draw acomplished
-        if(endedDraw){
-            if(!is_win){
-                markEndgameAsSolved();
-            }else{
-                handleReset();
-            }
-        }else if (b.is_checkmate(b.move)){
-            if(b.move != playerColor){
-                markEndgameAsSolved();
-            }else{
-                handleReset();
-            }
-        }else{
-            if (!stockfish){
-                makeStockFishMove()
-            }
-        }
+        check_status(stockfish);
     }
-
+    
     visualise_valid_squares(valid_moves, true);
     valid_moves = [];
 
@@ -425,7 +435,12 @@ function makeStockFishMove(){
     getBestMove().then(bestMove => {
         const ids = getIds(latestBestMove);
         const piece = b.get_bpiece_by_id(ids[0], b.board);
-        movemake(ids[0], ids[1], b.valid_moves_of(ids[0], false, b.board, b.move, piece.toLowerCase()), true);
+        movemake(
+            ids[0], 
+            ids[1], 
+            b.valid_moves_of(ids[0], false, b.board, b.move, piece.toLowerCase()), 
+            true, 
+            latestBestMove.length == 5 ? latestBestMove[4] : null);
     });
 }
 

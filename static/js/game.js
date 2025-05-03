@@ -49,18 +49,18 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if(message.includes("mate")){
                 const mateMatch = message.match(/ mate (\d+)/);
-                latestEval = "M"+mateMatch[1];
+                latestEval = "M"+ (mateMatch ? mateMatch[1] : "?");
             }else{
             
-            const scoreMatch = message.match(/score cp (-?\d+)/);
-            if (scoreMatch) {
-                let score = parseInt(scoreMatch[1]) / 100;
-                
-                if (b.move === 'b') {
-                    score = -score;
+                const scoreMatch = message.match(/score cp (-?\d+)/);
+                if (scoreMatch) {
+                    let score = parseInt(scoreMatch[1]) / 100;
+
+                    if (b.move === 'b') {
+                        score = -score;
+                    }
+                    latestEval = score > 0 ? `+${score}` : `${score}`;
                 }
-                latestEval = score > 0 ? `+${score}` : `${score}`;
-            }
             }
         }
         
@@ -229,7 +229,11 @@ document.onkeydown = (e) =>{
             const ids = getIds(latestBestMove);
             const piece = b.get_bpiece_by_id(ids[0], b.board);
             if (piece) {
-                movemake(ids[0], ids[1], b.valid_moves_of(ids[0], false, b.board, b.move, piece.toLowerCase()));
+                movemake(
+                    ids[0], ids[1], 
+                    b.valid_moves_of(ids[0], false, b.board, b.move, piece.toLowerCase()),
+                    false,
+                    latestBestMove.length == 5 ? latestBestMove[4] : null);
                 // Trigger analysis after move is made
                 triggerAnalysis();
             }
@@ -641,7 +645,7 @@ function updatePgn(move, start_square_id, square_id, isPromotion) {
 }
 
 // main move function
-function movemake(start_square_id, square_id, valid_moves, forpgnnav=false){
+function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, stockfishPromotedPiece=null){
     if (!valid_moves.includes(square_id)){
         // remove visuals for valid squares
         visualise_valid_squares(valid_moves, true); 
@@ -655,8 +659,13 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false){
         if(forpgnnav){
             handlePgnNavPromotion(start_square_id, square_id, forpgnnav);
         } else {
-            showPromotionBar(square_id, start_square_id);
-            setupPromotionSelection(start_square_id, square_id, forpgnnav);
+            if(stockfishPromotedPiece != null) {
+                handlePgnNavPromotion(start_square_id, square_id, b.move == "w" ? stockfishPromotedPiece.toUpperCase() :stockfishPromotedPiece);
+                updatePgn(b.to_readable(square_id)+"="+stockfishPromotedPiece.toUpperCase(), start_square_id, square_id, true);
+            }else{
+                showPromotionBar(square_id, start_square_id);
+                setupPromotionSelection(start_square_id, square_id, forpgnnav);
+            }
         }
     } else {
         handleRegularMove(start_square_id, square_id, forpgnnav);
