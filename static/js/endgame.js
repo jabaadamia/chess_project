@@ -14,6 +14,7 @@ window.piece_click = piece_click;
 
 let b = new Board(start_fen);
 let playerColor = b.move;
+let disableDrag = false;
 
 let cur_move = 0;
 
@@ -21,6 +22,19 @@ let latestBestMove = '';
 let latestEvalScore = 0;
 let stockfish = null; // Global stockfish worker
 let resolveBestMove = null;
+
+window.resetEndgame = resetEndgame;
+function resetEndgame(){    
+    b = new Board(start_fen);
+    playerColor = b.move;
+    cur_move = 0;
+    const alertBox = document.getElementById('try-again-alert');
+    if (alertBox) {
+      alertBox.remove();
+    }
+    disableDrag = false;
+    add_drag(b.move);
+}
 
 document.addEventListener('DOMContentLoaded', function() {
     // Create a Web Worker from the stockfish.js file
@@ -187,6 +201,9 @@ function get_square_id(top, left){
 
 // when piece is grabed
 function dragMouseDown(e) {
+    if(disableDrag)
+        return
+
     valid_moves = b.valid_moves_of(parseInt(this.parentNode.id), false, b.board, b.move, this.classList[0].toLowerCase());
     start_square_id = this.parentNode.id;
 
@@ -380,17 +397,17 @@ function movemake(start_square_id, square_id, valid_moves, stockfish=false){
 
         const endedDraw = (b.full_moves > 50 && latestEvalScore <= 1 || b.is_insufficient_material()) || b.is_stealmate();
         // draw acomplished
-        if(!is_win && endedDraw){
-            if(endedDraw){
+        if(endedDraw){
+            if(!is_win){
                 markEndgameAsSolved();
             }else{
-                //handle restarting endgame
+                handleReset();
             }
         }else if (b.is_checkmate(b.move)){
             if(b.move != playerColor){
                 markEndgameAsSolved();
             }else{
-                //handle restarting endgame 
+                handleReset();
             }
         }else{
             if (!stockfish){
@@ -412,6 +429,15 @@ function makeStockFishMove(){
     });
 }
 
+function handleReset(){
+    document.getElementById('nav-buttons').innerHTML += `
+      <div id="try-again-alert" style="color: #e74c3c; display:flex; align-items:center; gap:10px;">
+        <span style="font-size:18px;">×</span>
+        <span style="font-size:16px;">Try again!</span>
+      </div>
+    `;
+    disableDrag = true;
+}
 
 async function markEndgameAsSolved() {
     fetch(window.location.href, {
