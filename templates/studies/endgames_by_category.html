@@ -55,6 +55,7 @@
 
     <script>
         let start_fen = '{{ detail_endgame.fen }}';
+        const is_win = 'True' == '{{ detail_endgame.is_win }}';
         const category = '{{ category }}';
         const csrftoken = '{{ csrf_token }}';
     </script>

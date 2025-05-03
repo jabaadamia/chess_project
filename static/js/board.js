@@ -285,6 +285,71 @@ export class Board {
         if (!this.is_check(color, board)){
             return false;
         }
+        return this.has_no_valid_moves(color, board);
+    }
+
+    is_stealmate(color=this.move, board=this.board){
+        if (this.is_check(color, board)){
+            return false;
+        }
+        return this.has_no_valid_moves(color, board);
+    }
+
+    is_insufficient_material(board=this.board) {
+        const whitePieces = this.get_white_pieces(board);
+        const blackPieces = this.get_black_pieces(board);
+        
+        // Count all pieces except kings
+        const whitePiecesExceptKing = [...whitePieces].filter(([_, piece]) => piece !== 'K');
+        const blackPiecesExceptKing = [...blackPieces].filter(([_, piece]) => piece !== 'k');
+        
+        // King vs King
+        if (whitePiecesExceptKing.length === 0 && blackPiecesExceptKing.length === 0) {
+          return true;
+        }
+
+        const allWhiteBishops = whitePiecesExceptKing.every(([_, piece]) => piece === 'B');
+        const allBlackBishops = blackPiecesExceptKing.every(([_, piece]) => piece === 'b');
+
+        if (!(allWhiteBishops && allBlackBishops)) {
+            // One side has only a single knight or bishop
+            if ((whitePiecesExceptKing.length === 1 && blackPiecesExceptKing.length === 0) ||
+                (blackPiecesExceptKing.length === 1 && whitePiecesExceptKing.length === 0)) {
+                const singlePiece = whitePiecesExceptKing.length === 1 ? 
+                                    whitePiecesExceptKing[0][1] : 
+                                    blackPiecesExceptKing[0][1];
+                // Only knight or bishop is insufficient
+                return ['N', 'n', 'B', 'b'].includes(singlePiece);
+            }
+            return false;
+        }
+        
+        // Only bishops on board
+        // Get square colors for white bishops
+        const whiteSquareColors = whitePiecesExceptKing.map(([square, _]) => 
+          (Math.floor(square / 10) + square % 10) % 2
+        );
+
+        // Get square colors for black bishops
+        const blackSquareColors = blackPiecesExceptKing.map(([square, _]) => 
+          (Math.floor(square / 10) + square % 10) % 2
+        );
+
+        // Check if all bishops are on the same colored squares
+        const allWhiteBishopsOnSameColor = whiteSquareColors.every(color => color === whiteSquareColors[0]);
+        const allBlackBishopsOnSameColor = blackSquareColors.every(color => color === blackSquareColors[0]);
+
+        // If all bishops are on same color squares, there's insufficient material
+        if (allWhiteBishopsOnSameColor && allBlackBishopsOnSameColor) {
+          // Bishops must all be on the same colored squares
+          return whiteSquareColors[0] === blackSquareColors[0];
+        }
+
+        // Any other combination has sufficient material
+        return false;
+    }
+
+    has_no_valid_moves(color=this.move, board=this.board){
         let moves;
         if (color == 'w'){
             for (const [key, value] of this.white_piece_poss) {
@@ -299,8 +364,7 @@ export class Board {
                 }
             }
         }
-        
-        return true;
+        return true; 
     }
 
     //returns list of valid moves of given piece (rook, bishop, queen)

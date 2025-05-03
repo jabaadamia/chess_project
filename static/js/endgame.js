@@ -3,14 +3,22 @@ import { Board, icons } from "./board.js";
 const movesound = new Audio('/static/images/move.mp3');
 movesound.volume = 0.7;
 
+window.firstmove = ()=>{};
+window.prevmove = ()=>{};
+window.play = ()=>{};
+window.nextmove = ()=>{};
+window.lastmove = ()=>{};
+
 window.rotate = rotate;
 window.piece_click = piece_click;
 
 let b = new Board(start_fen);
+let playerColor = b.move;
 
 let cur_move = 0;
 
 let latestBestMove = '';
+let latestEvalScore = 0;
 let stockfish = null; // Global stockfish worker
 let resolveBestMove = null;
 
@@ -25,6 +33,14 @@ document.addEventListener('DOMContentLoaded', function() {
     stockfish.onmessage = function(event) {
         const message = event.data;
         
+        if (message.startsWith('info') && message.includes('score cp')) {
+            const scoreMatch = message.match(/score cp (-?\d+)/);
+            latestEvalScore = parseInt(scoreMatch[1]) / 100;
+            if (b.move === 'b') {
+                latestEvalScore = -latestEvalScore;
+            }
+        }
+
         // Store best move when found
         if (message.startsWith('bestmove')) {
             const moveMatch = message.match(/bestmove (\S+)/);
@@ -54,7 +70,7 @@ function triggerAnalysis() {
 
         const fen = b.get_full_fen();
         stockfish.postMessage('position fen ' + fen);
-        stockfish.postMessage('go depth 15'); // Adjust depth as needed
+        stockfish.postMessage('go depth 17'); // Adjust depth as needed
 
         // Store the resolver to be called when bestmove arrives
         resolveBestMove = resolve;
@@ -361,8 +377,21 @@ function movemake(start_square_id, square_id, valid_moves, stockfish=false){
         setupPromotionSelection(start_square_id, square_id);
     } else {
         handleRegularMove(start_square_id, square_id);
-        if (b.is_checkmate(b.move)){
-            markEndgameAsSolved();
+
+        const endedDraw = (b.full_moves > 50 && latestEvalScore <= 1 || b.is_insufficient_material()) || b.is_stealmate();
+        // draw acomplished
+        if(!is_win && endedDraw){
+            if(endedDraw){
+                markEndgameAsSolved();
+            }else{
+                //handle restarting endgame
+            }
+        }else if (b.is_checkmate(b.move)){
+            if(b.move != playerColor){
+                markEndgameAsSolved();
+            }else{
+                //handle restarting endgame 
+            }
         }else{
             if (!stockfish){
                 makeStockFishMove()
