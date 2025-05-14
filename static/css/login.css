@@ -40,6 +40,7 @@ form p label {
 }
 
 form p input {
+    box-sizing: border-box;
     width: 100%;
     padding: 0.8rem;
     background-color: #2a2a2a;
