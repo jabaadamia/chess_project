@@ -307,9 +307,17 @@ async function submitMove(move) {
                 }
             } else {
                 // to add next move making
-                let ids = getIds(data.next_move);
+                let ids = getIds(data.next_move.slice(0, 4));
                 await sleep(500);
-                movemake(ids[0], ids[1], [ids[1]], false, false);
+
+                movemake(
+                ids[0], 
+                ids[1], 
+                [ids[1]],
+                false,
+                false, 
+                data.next_move.length == 5 ? data.next_move[4] : null);
+
                 currentSolution += (currentSolution ? ' ' : '') + data.next_move;
                 message.innerText = '✓  Correct so far, keep going! ';
             }
@@ -410,7 +418,7 @@ function setupPromotionSelection(start_square_id, square_id, forpgnnav, move_puz
         if (!forpgnnav){
             updatePgnForPromotion(move, start_square_id, square_id);
             if (to_submit){
-                submitMove(move_puzzle_format);
+                submitMove(move_puzzle_format+e.target.className.toUpperCase());
             }
         }
         
@@ -526,7 +534,7 @@ function updatePgnForRegularMove(move, start_square_id, square_id) {
 }
 
 // Main function to handle chess moves
-function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_submit=true){
+function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_submit=true, solutionPromotedPiece=null){
     let promotion = false;
     let move_puzzle_format = b.to_readable(start_square_id)+b.to_readable(square_id);
 
@@ -540,7 +548,19 @@ function movemake(start_square_id, square_id, valid_moves, forpgnnav=false, to_s
 
     if (promotion){
         if(!forpgnnav){
-            showPromotionBar(square_id, start_square_id);
+            if(solutionPromotedPiece != null){
+                solutionPromotedPiece = b.move == "w" ? solutionPromotedPiece.toUpperCase() : solutionPromotedPiece.toLowerCase();
+
+                document.getElementById(start_square_id).innerHTML = '';
+                document.getElementById(square_id).innerHTML += icons.get(solutionPromotedPiece);
+                
+                b.make_move(parseInt(start_square_id), parseInt(square_id), b.board, b.move, solutionPromotedPiece);
+                updatePgnForPromotion(b.to_readable(square_id)+"="+solutionPromotedPiece.toUpperCase(), start_square_id, square_id);
+                movesound.play();
+                add_drag(b.move);
+            }else{
+                showPromotionBar(square_id, start_square_id);
+            }
         }
         
         if(forpgnnav){
