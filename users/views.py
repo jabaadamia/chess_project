@@ -1,5 +1,6 @@
 from django.views.generic import DetailView
 from django.shortcuts import get_object_or_404
+from django.core.exceptions import PermissionDenied
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import CustomUser
@@ -17,7 +18,9 @@ class ProfileView(LoginRequiredMixin, DetailView):
 
     def get_object(self, queryset=None):
         username = self.kwargs.get(self.slug_url_kwarg)
-        return get_object_or_404(CustomUser, username=username)
+        if username != self.request.user.username:
+            raise PermissionDenied("You are not allowed to view other users' profiles.")
+        return self.request.user
 
     def get_context_data(self, **kwargs):
         context =  super().get_context_data(**kwargs)
