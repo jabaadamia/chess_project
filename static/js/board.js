@@ -10,22 +10,6 @@ const DIRS = {
 const bpieces = 'prnbqk';
 const wpieces = 'PRNBQK'; 
 
-export const icons = new Map([
-    ['p', "<img class='p' src='/static/images/chessicons/blackpawn.png' alt='bp'></img>"],
-    ['r', "<img class='r' src='/static/images/chessicons/blackrook.png' alt='br'></img>"],
-    ['n', "<img class='n' src='/static/images/chessicons/blackknight.png' alt='bn'></img>"],
-    ['b', "<img class='b' src='/static/images/chessicons/blackbishop.png' alt='bb'></img>"],
-    ['q', "<img class='q' src='/static/images/chessicons/blackqueen.png' alt='bq'></img>"],
-    ['k', "<img class='k' src='/static/images/chessicons/blackking.png' alt='bk'></img>"],
-    ['P', "<img class='P' src='/static/images/chessicons/whitepawn.png' alt='wp'></img>"],
-    ['R', "<img class='R' src='/static/images/chessicons/whiterook.png' alt='wr'></img>"],
-    ['N', "<img class='N' src='/static/images/chessicons/whiteknight.png' alt='wn'></img>"],
-    ['B', "<img class='B' src='/static/images/chessicons/whitebishop.png' alt='wb'></img>"],
-    ['Q', "<img class='Q' src='/static/images/chessicons/whitequeen.png' alt='wq'></img>"],
-    ['K', "<img class='K' src='/static/images/chessicons/whiteking.png' alt='wk'></img>"]
-])
-
-
 export class Board {
     constructor (fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'){
         this.board = [
@@ -38,8 +22,6 @@ export class Board {
             [null, null, null, null, null, null, null, null],
             [null, null, null, null, null, null, null, null]
         ]
-        
-        this.rotated = false;
 
         this.fen = fen;
         this.move = fen.split(' ')[1];
@@ -67,8 +49,6 @@ export class Board {
         this.white_threats = this.all_white_valid_moves();
         this.black_threats = this.all_black_valid_moves();
 
-        
-        this.draw_board(this.board);
     }
 
     get_full_fen(board=this.board){
@@ -122,48 +102,6 @@ export class Board {
             }
             r += 1;
         });
-    }
-
-    draw_board(board, rotate=false, blind=false){
-        // reset board
-        document.getElementById('wrapper').querySelectorAll('div').forEach(element => {
-            element.innerHTML = null;
-            // if board is being rotated change ids
-            if(rotate){
-                let r = element.id % 10;
-                let c = (element.id - r) / 10;
-                element.id = (9-c)*10 + (9-r);
-            }
-        });
-        
-        // draw board
-        for (let r = 0; r < 8; r++){
-            for (let c = 0; c < 8; c++){
-                let letter;
-                let cell_id;
-                if (rotate){letter = board[r][7 - c]; cell_id = 10 * (8 - c) + 7 - r + 1;}
-                else{letter = board[7 - r][c]; cell_id = 10 * (c + 1) + r + 1;}
-
-                //cell_id = 10 * (c + 1) + r + 1;
-                if (letter != null){
-                    const cell = document.getElementById(cell_id);
-                    cell.innerHTML = icons.get(letter);
-                    if (blind){
-                        cell.firstElementChild.classList.add('blind'); 
-                    }
-                }
-            }
-        }
-    }
-
-    rotate_board(){
-        if (this.rotated){
-            this.draw_board(this.board, false);
-            this.rotated = false;
-        }else{
-            this.draw_board(this.board, true);
-            this.rotated = true;
-        }
     }
     
     get_bpiece_by_id(id, board=this.board){  // returns piece on r, c by id

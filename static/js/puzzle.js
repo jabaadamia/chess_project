@@ -1,4 +1,14 @@
-import { Board, icons } from "./board.js";
+import { Board } from "./board.js";
+import { 
+    icons,
+    draw_board,
+    visualise_valid_squares, 
+    add_drag, initDrag, setDisableDrag,
+    getCSRFToken, 
+    rotate, is_rotated, 
+    getIds, 
+    isPromotion, showPromotionBar 
+} from "./utils.js";
 
 const movesound = new Audio('/static/images/move.mp3');
 movesound.volume = 0.7;
@@ -21,15 +31,22 @@ window.piece_click = piece_click;
 window.pgn_click = pgn_click;
 
 let b = new Board(start_fen);
+draw_board(b.board);
 
 message.innerText = b.move == 'w' ? 'white to play' : 'black to play';
 
 let cur_move = 0;
 
-let is_rotated = false;
 if(b.move == 'b'){
     rotate();
 }
+
+initDrag({
+    getBoard: () => b,
+    movemake: movemake,
+    is_rotated: () => is_rotated,
+    disableDragRef: { value: false },
+});
 
 add_drag(b.move);
 
@@ -72,18 +89,7 @@ function sleep(ms){
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function rotate(){
-    is_rotated = !is_rotated;
-    b.rotated = is_rotated;
-    b.rotate_board();
-    b.rotate_board();
-    add_drag(b.move);  // needs to be fixed
-}
-
 function piece_click(e){
-    //if(e.target.tagName == 'IMG'){console.log(e.target.parentNode.id)}
-    //else{console.log(e.target.id)}
-    //b.clicked(e)
 }
 
 function pgn_click(e){
@@ -93,6 +99,10 @@ function pgn_click(e){
 function pgn_nav(move_num){
     if(move_num >= 0){
         b = new Board(start_fen);
+        draw_board(b.board);
+        if(move_num != from_tos.length){setDisableDrag(true);}
+        else{setDisableDrag(false);}
+        
         for(let i = 0; i < move_num; i++){
             if (from_tos[i].length == 3){  // promotion
                 movemake(from_tos[i][0], from_tos[i][1], [from_tos[i][1]], from_tos[i][2]);
@@ -104,179 +114,6 @@ function pgn_nav(move_num){
     }
 }
 
-
-
-function add_drag(move){
-    if(move === 'w'){     // add drag events to white pieces
-        ['P','R','N','B','Q','K']
-        .forEach(piece => {
-            document.querySelectorAll('.'+piece).forEach(p => {
-                p.style = 'pointer-events: all; z-index: 3;';
-                p.onmousedown = dragMouseDown;
-                p.ontouchstart = dragMouseDown;  // Add touch event
-            });
-        });
-        ['p','r','n','b','q','k']
-        .forEach(piece => {
-            document.querySelectorAll('.'+piece).forEach(p => {
-                p.style = 'pointer-events: none; z-index: 2;';
-                p.onmousedown = null;
-                p.ontouchstart = null;  // Remove touch event
-            });
-        });
-    }else{  // add drag events to black pieces
-        ['p','r','n','b','q','k']
-        .forEach(piece => {
-            document.querySelectorAll('.'+piece).forEach(p => {
-                p.style = 'pointer-events: all; z-index: 2;';
-                p.onmousedown = dragMouseDown;
-                p.ontouchstart = dragMouseDown;  // Add touch event
-            });
-        });
-        ['P','R','N','B','Q','K']
-        .forEach(piece => {
-            document.querySelectorAll('.'+piece).forEach(p => {
-                p.style = 'pointer-events: none; z-index: 1;';
-                p.onmousedown = null;
-                p.ontouchstart = null;  // Remove touch event
-            });
-        });
-    }
-}
-
-
-let dragging_piece;
-let valid_moves;// ids of valid moves of dragging_piece
-let start_square_id;  // on which dragging_piece is
-
-var pos1;
-var pos2;
-var pos3;
-var pos4;
-
-var top;
-var left;
-
-function visualise_valid_squares(valid_moves, remove){
-    valid_moves.forEach(square_id => {
-        const square = document.getElementById(square_id);
-        if (remove){
-            const circle = square.querySelector('.circle');
-            if (circle) {
-                square.removeChild(circle);
-            }else{square.style.backgroundColor = ''}
-        }else{
-            if (square.children.length === 0) {
-                const circle = document.createElement('span');
-                circle.className = 'circle';
-                square.appendChild(circle);
-            }else{square.style.backgroundColor = '#f5a142';}
-        }
-    });
-}
-
-function get_square_id(top, left){
-    const board = document.getElementById('wrapper');
-    const squareSize = board.offsetWidth / 8;
-    const row = Math.floor((top + squareSize/2)/squareSize);
-    const col = Math.floor((left + squareSize/2)/squareSize);
-    if (is_rotated){
-        return (9-(col + 1))*10 + 9-(8 - row);
-    }
-    return (col + 1)*10 + (8 - row);
-}
-
-// when piece is grabed
-function dragMouseDown(e) {
-    valid_moves = b.valid_moves_of(parseInt(this.parentNode.id), false, b.board, b.move, this.classList[0].toLowerCase());
-    start_square_id = this.parentNode.id;
-
-    visualise_valid_squares(valid_moves, false);
-
-    dragging_piece = this;
-    dragging_piece.style.position = 'absolute';
-    dragging_piece.classList.add('dragging');
-    
-    if (e.type === 'touchstart') {
-        e.preventDefault(); // Prevent scrolling while dragging
-        pos3 = e.touches[0].clientX;
-        pos4 = e.touches[0].clientY;
-        document.ontouchend = closeDragElement;
-        document.ontouchmove = elementDrag;
-    } else {
-        e = e || window.event;
-        e.preventDefault();
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        document.onmouseup = closeDragElement;
-        document.onmousemove = elementDrag;
-    }
-}
-
-//when grabbing piece is moveing
-function elementDrag(e) {
-    e = e || window.event;
-    e.preventDefault();
-
-    if (e.type === 'touchmove') {
-        pos1 = pos3 - e.touches[0].clientX;
-        pos2 = pos4 - e.touches[0].clientY;
-        pos3 = e.touches[0].clientX;
-        pos4 = e.touches[0].clientY;
-    } else {
-        pos1 = pos3 - e.clientX;
-        pos2 = pos4 - e.clientY;
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-    }
-
-    top = dragging_piece.offsetTop - pos2;
-    left = dragging_piece.offsetLeft - pos1;
-
-    dragging_piece.style.top = (top) + "px";
-    dragging_piece.style.left = (left) + "px";     
-}
-
-// when piece is placed
-function closeDragElement(e) {
-    document.onmouseup = null;
-    document.onmousemove = null;
-    document.ontouchend = null;
-    document.ontouchmove = null;
-
-    const board = document.getElementById('wrapper');
-    const squareSize = board.offsetWidth / 8;
-    const boardRect = board.getBoundingClientRect();
-    
-    // Calculate the final position relative to the board
-    const finalTop = top;
-    const finalLeft = left;
-    
-    // Calculate the target square
-    const row = Math.floor((finalTop + squareSize/2)/squareSize);
-    const col = Math.floor((finalLeft + squareSize/2)/squareSize);
-    
-    let square_id;
-    if (is_rotated){
-        square_id = (9-(col + 1))*10 + 9-(8 - row);
-    } else {
-        square_id = (col + 1)*10 + (8 - row);
-    }
-
-    dragging_piece.style.position = 'relative';
-    dragging_piece.style.left = '';
-    dragging_piece.style.top = '';
-    dragging_piece.classList.remove('dragging');
-    movemake(start_square_id, square_id, valid_moves);
-}
-
-function getIds(move) {
-    const from = b.to_id(move.slice(0, 2));
-    const to = b.to_id(move.slice(2, 4));
-    
-    return [from, to];
-  }
-
 async function submitMove(move) {
     currentSolution += (currentSolution ? ' ' : '') + move;
     
@@ -284,7 +121,7 @@ async function submitMove(move) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': csrftoken,
+            'X-CSRFToken': getCSRFToken(),
         },
         body: JSON.stringify({
             'current_solution': currentSolution
@@ -350,36 +187,6 @@ async function submitMove(move) {
     .catch(error => console.error('Error:', error));
 }
 
-
-// Check if a move is a pawn promotion
-function isPromotion(start_square_id, square_id) {
-    return (square_id % 10 == 8 && document.getElementById(start_square_id).childNodes[0].classList.contains('P')) ||
-           (square_id % 10 == 1 && document.getElementById(start_square_id).childNodes[0].classList.contains('p'));
-}
-
-// Show the promotion bar for selecting a promotion piece
-function showPromotionBar(square_id, start_square_id) {
-    let bar = document.getElementById('promotion-bar');
-    const board = document.getElementById('wrapper');
-    const squareSize = board.offsetWidth / 8;
-    const boardRect = board.getBoundingClientRect();
-    const isWhite = square_id % 10 == 8;
-    
-    let t = isWhite ? 0 : board.offsetHeight - squareSize*4;
-    let l = boardRect.left + squareSize*((square_id-square_id%10)/10-1);
-    if (is_rotated){
-        t = isWhite ? board.offsetHeight - squareSize*4 : 0;
-        l = boardRect.left + squareSize*(9-(square_id-square_id%10)/10-1);
-    }
-    
-    bar.style = 'visibility: visible; width: '+(squareSize-2)+'px; top: '+t+'px; left: '+l+'px;';
-    for (let i = 0; i < 4; i++){
-        const element = bar.childNodes[2*i+1];
-        element.style = 'width: '+(squareSize-2)+'px; height: '+squareSize+'px;';
-        let img = icons.get(isWhite ? ['Q', 'R', 'B', 'N'][i] : ['q', 'r', 'b', 'n'][i]);
-        element.innerHTML = img;
-    }
-}
 
 // Handle PGN navigation promotion
 function handlePgnNavPromotion(start_square_id, square_id, forpgnnav) {
