@@ -34,7 +34,7 @@ let stockfish = null; // Global stockfish worker
 
 document.addEventListener('DOMContentLoaded', function() {
     // Create a Web Worker from the stockfish.js file
-    stockfish = new Worker('/static/js/stockfish.js');
+    stockfish = new Worker('/static/js/stockfish.wasm.js');
     
     // Reference to output element
     const outputElement = document.getElementById('output');
@@ -131,7 +131,7 @@ function triggerAnalysis() {
         outputElement.innerHTML = 'Analyzing...';
         const fen = b.get_full_fen();
         stockfish.postMessage('position fen ' + fen);
-        stockfish.postMessage('go depth 15');
+        stockfish.postMessage('go depth 20');
     }
 }
 

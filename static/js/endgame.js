@@ -38,7 +38,7 @@ function resetEndgame(){
 
 document.addEventListener('DOMContentLoaded', function() {
     // Create a Web Worker from the stockfish.js file
-    stockfish = new Worker('/static/js/stockfish.js');
+    stockfish = new Worker('/static/js/stockfish.wasm.js');
     
     // Initialize variables to store analysis results
     latestBestMove = '';
