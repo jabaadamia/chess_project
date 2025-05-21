@@ -66,7 +66,6 @@ export function draw_board(board, rotate=false, blind=false){
 }
 
 export function visualise_valid_squares(valid_moves, remove) {
-    console.log(remove)
     valid_moves.forEach(square_id => {
         const square = document.getElementById(square_id);
         if (remove) {

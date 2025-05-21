@@ -81,17 +81,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
 
-        //console.log(message)
         // Store best move when found
         if (message.startsWith('info') && message.includes('depth')) {
             const {depth, moves} = parseEvalInfo(message);
             latestBestMove = moves[0];
             // Display both evaluation and best move
             if (latestEval) {
+                const sanLine = uciLineToSanLine(moves, b.get_full_fen());
                 outputElement.innerHTML = `
                     <div><strong>Evaluation:</strong> ${latestEval}</div>
                     <div><strong>depth: </strong>${depth}</div>
-                    <div><strong></strong>${moves.join(' ')}</div>
+                    <div><strong></strong>${sanLine}</div>
                     <div class="hint">Press SPACE to make this move</div>
                 `;
             } else {
@@ -114,9 +114,9 @@ document.addEventListener('DOMContentLoaded', function() {
             outputElement.innerHTML = 'Analyzing...';
             
             const fen = b.get_full_fen();
-            console.log(fen);
+            
             stockfish.postMessage('position fen ' + fen);
-            stockfish.postMessage('go depth 17');
+            stockfish.postMessage('go depth 18');
         } else {
             outputElement.innerHTML = '';
             latestEval = '';
@@ -147,8 +147,29 @@ function triggerAnalysis() {
         outputElement.innerHTML = 'Analyzing...';
         const fen = b.get_full_fen();
         stockfish.postMessage('position fen ' + fen);
-        stockfish.postMessage('go depth 20');
+        stockfish.postMessage('go depth 18');
     }
+}
+
+function uciLineToSanLine(moves, initialFen) {
+    const board = new Board(initialFen);
+    const sanMoves = [];
+
+    for (const move of moves) {
+        const from = board.to_id(move.slice(0, 2));
+        const to = board.to_id(move.slice(2, 4));
+        const promotion = move.length > 4 ? move[4] : false;
+        let san;
+        try{
+            san = board.make_move(from, to, board.board, board.move, promotion);
+            if ((san === 'Kg1' && move === 'e1g1') || (san === 'Kg8' && move === 'e8g8')) san = '0-0';
+            if ((san === 'Kc1' && move === 'e1c1') || (san === 'Kc8' && move === 'e8c8')) san = '0-0-0';
+        }catch{san = ''}
+        
+        sanMoves.push(san + (promotion ? '='+move[4] : ''));
+    }
+
+    return sanMoves.join(' ');
 }
 
 function parsePGN(pgn) {
