@@ -37,10 +37,6 @@ message.innerText = b.move == 'w' ? 'white to play' : 'black to play';
 
 let cur_move = 0;
 
-if(b.move == 'b'){
-    rotate();
-}
-
 initDrag({
     getBoard: () => b,
     movemake: movemake,
@@ -49,6 +45,10 @@ initDrag({
 });
 
 add_drag(b.move);
+
+if(b.move == 'b'){
+    rotate();
+}
 
 document.onkeydown = (e) =>{
     if (e.code == 'ArrowLeft'){
@@ -166,6 +166,9 @@ async function submitMove(move) {
             // Remove the last move from PGN display
             let lastMove = document.getElementById('m' + b.half_moves);
             
+            // Remove the last move from from_tos array
+            from_tos.pop();
+            
             await sleep(500);
             prevmove();
             
@@ -176,8 +179,6 @@ async function submitMove(move) {
                     lastMove.remove()
                 }
             }
-            // Remove the last move from from_tos array
-            from_tos.pop(); 
             // Re-add drag functionality
             add_drag(b.move);
 
