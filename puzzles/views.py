@@ -2,11 +2,13 @@ from django.views.generic import ListView, DetailView
 from django.urls import reverse
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from django.db.models import Case, When
 from django.http import JsonResponse, Http404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
+
 import json
+import random
 
 from .models import Puzzle, Tag
 from .forms import PuzzleFilterForm
@@ -184,17 +186,14 @@ class TagPuzzleListView(BasePuzzleView):
         context['next_puzzle_id'] = self.get_next_puzzle_id()
         return context
 
-
 class PuzzleTestView(BasePuzzleView):
     model = Puzzle
     template_name = 'puzzles/test.html'
-
     context_object_name = 'puzzles'
 
     def get_queryset(self):
-        filtered_puzzles = None
         form = PuzzleFilterForm(self.request.GET or None)
-        
+
         if form.is_valid():
             themes = form.cleaned_data['themes']
             number_of_puzzles = form.cleaned_data['number_of_puzzles']
@@ -202,6 +201,7 @@ class PuzzleTestView(BasePuzzleView):
             max_rating = form.cleaned_data['max_rating']
 
             filtered_puzzles = Puzzle.objects.all()
+
             if themes:
                 filtered_puzzles = filtered_puzzles.filter(tags__in=themes)
             if min_rating is not None:
@@ -209,37 +209,39 @@ class PuzzleTestView(BasePuzzleView):
             if max_rating is not None:
                 filtered_puzzles = filtered_puzzles.filter(elo_rating__lte=max_rating)
 
-            #filtered_puzzles = filtered_puzzles.order_by('?')
+            puzzle_ids = list(filtered_puzzles.values_list('id', flat=True))
+            random.shuffle(puzzle_ids)
+
             if number_of_puzzles:
-                filtered_puzzles = filtered_puzzles[:number_of_puzzles]
+                puzzle_ids = puzzle_ids[:number_of_puzzles]
 
-            self.request.session['filtered_puzzle_ids'] = list(filtered_puzzles.values_list('id', flat=True))
+            self.request.session['filtered_puzzle_ids'] = puzzle_ids
+
         else:
-            # Retrieve the filtered puzzle IDs from the session
-            filtered_puzzle_ids = self.request.session.get('filtered_puzzle_ids', [])
-            filtered_puzzles = Puzzle.objects.filter(id__in=filtered_puzzle_ids)
-        
-        return filtered_puzzles
+            puzzle_ids = self.request.session.get('filtered_puzzle_ids', [])
 
+        preserved_order = Case(*[When(id=pk, then=pos) for pos, pk in enumerate(puzzle_ids)])
+        return Puzzle.objects.filter(id__in=puzzle_ids).order_by(preserved_order)
+
+    def current_puzzle(self, idx):
+        puzzle_ids = self.request.session.get('filtered_puzzle_ids', [])
+        if 0 < idx <= len(puzzle_ids):
+            return Puzzle.objects.get(id=puzzle_ids[idx - 1])
+        raise Http404("Puzzle index out of range")
 
     def get_next_puzzle_id(self):
         return self.kwargs['idx'] + 1
-        
-    
-    def current_puzzle(self, idx):
-        return self.get_queryset()[idx-1]
 
     def post(self, request, *args, **kwargs):
         puzzle = self.current_puzzle(self.kwargs['idx'])
         data = json.loads(request.body)
         current_solution = data.get('current_solution', '').strip()
         response = self.validate_solution(request, puzzle, current_solution)
-        
+
         filtered_puzzle_ids = self.request.session.get('filtered_puzzle_ids', [])
         current_index = filtered_puzzle_ids.index(puzzle.id) if puzzle.id in filtered_puzzle_ids else -1
         is_last_puzzle = current_index == len(filtered_puzzle_ids) - 1
 
-        # Convert JsonResponse to a dictionary
         response_data = json.loads(response.content.decode('utf-8'))
 
         if is_last_puzzle and response_data.get('complete', False):
@@ -248,13 +250,16 @@ class PuzzleTestView(BasePuzzleView):
                 'url': reverse('puzzle_home')})
         else:
             return response
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['detail_puzzle'] = self.current_puzzle(self.kwargs['idx'])
+        try:
+            context['detail_puzzle'] = self.current_puzzle(self.kwargs['idx'])
+        except Http404:
+            context['detail_puzzle'] = None
         context['next_puzzle_id'] = self.get_next_puzzle_id()
-    
         return context
+
         
 
 class PuzzleDetailView(DetailView):
