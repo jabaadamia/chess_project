@@ -19,16 +19,5 @@ RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 # Copy project
 COPY . /code/
 
-# During build
-RUN python manage.py collectstatic --noinput
 
-# Debug: check if staticfiles directory exists
-RUN ls -la staticfiles/ 
-
-# Show some files
-RUN echo "STATIC_ROOT contents:" && find staticfiles/ -type f | head -10  
-
-
-
-# Runtime command 
-CMD ["sh", "-c", "python manage.py migrate && gunicorn chess_project.wsgi:application --bind 0.0.0.0:8080"]
+CMD ["sh", "-c", "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn chess_project.wsgi:application --bind 0.0.0.0:8080"]
