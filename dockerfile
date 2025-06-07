@@ -6,10 +6,10 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 # Set work directory
-WORKDIR /app
+WORKDIR /code
 
 # Install dependencies
-COPY requirements.txt /app/
+COPY requirements.txt /code/
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Install Git and other necessary utilities
@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 
 
 # Copy project
-COPY . /app/
+COPY . /code/
 
 
 CMD ["sh", "-c", "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn chess_project.wsgi:application --bind 0.0.0.0:8080"]
