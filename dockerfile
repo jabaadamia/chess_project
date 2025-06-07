@@ -19,8 +19,13 @@ RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 # Copy project
 COPY . /code/
 
-# Collect static files
+# During build
 RUN python manage.py collectstatic --noinput
 
-# Use Gunicorn for production
-CMD ["sh", "-c", "python manage.py collectstatic --noinput && gunicorn chess_project.wsgi:application --bind 0.0.0.0:8080"]
+RUN python manage.py collectstatic --noinput
+RUN ls -la staticfiles/  # Debug: check if staticfiles directory exists
+RUN echo "STATIC_ROOT contents:" && find staticfiles/ -type f | head -10  # Show some files
+
+
+# Runtime command 
+CMD ["sh", "-c", "python manage.py migrate && gunicorn chess_project.wsgi:application --bind 0.0.0.0:8080"]
