@@ -22,9 +22,12 @@ COPY . /code/
 # During build
 RUN python manage.py collectstatic --noinput
 
-RUN python manage.py collectstatic --noinput
-RUN ls -la staticfiles/  # Debug: check if staticfiles directory exists
-RUN echo "STATIC_ROOT contents:" && find staticfiles/ -type f | head -10  # Show some files
+# Debug: check if staticfiles directory exists
+RUN ls -la staticfiles/ 
+
+# Show some files
+RUN echo "STATIC_ROOT contents:" && find staticfiles/ -type f | head -10  
+
 
 
 # Runtime command 
