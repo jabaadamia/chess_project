@@ -32,13 +32,13 @@ DEBUG = int(os.environ.get('DEBUG', default=0))
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    '.railway.app',
+    'chessproject-production.up.railway.app',
     # 'your-app.up.railway.app',  # Uncomment and set your Railway domain here after first deploy
 ]
 
 # CSRF_TRUSTED_ORIGINS example for Railway (uncomment and set as needed)
 CSRF_TRUSTED_ORIGINS = [
-    'https://.railway.app',
+    'https://chessproject-production.up.railway.app',
 ]
 
 
