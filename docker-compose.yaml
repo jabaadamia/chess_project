@@ -1,3 +1,5 @@
+# NOTE: This docker-compose file is for local development only.
+# On Railway, use their service and plugin system for deployment.
 version: '3.8'
 
 services:
