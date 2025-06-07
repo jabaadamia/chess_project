@@ -23,4 +23,4 @@ COPY . /code/
 RUN python manage.py collectstatic --noinput
 
 # Use Gunicorn for production
-CMD gunicorn chess_project.wsgi:application --bind 0.0.0.0:8080
+CMD ["sh", "-c", "python manage.py collectstatic --noinput && gunicorn chess_project.wsgi:application --bind 0.0.0.0:8080"]
